@@ -22,7 +22,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
-        url: process.env.DATABASE_URL,
+        url: process.env.PROD_POSTGRES_URL,
         autoLoadEntities: true,
         synchronize: true, // Garde le pour l'instant si tu veux créer tes tables
         ssl: {
