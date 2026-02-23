@@ -16,15 +16,19 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      autoLoadEntities: true,
-      synchronize: true,
-      ssl: {
-        rejectUnauthorized: false, // INDISPENSABLE pour Supabase sur Vercel
-      },
+    ConfigModule.forRoot({
+      isGlobal: true, // Rend les variables d'env disponibles partout
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        url: process.env.DATABASE_URL,
+        autoLoadEntities: true,
+        synchronize: true, // Garde le pour l'instant si tu veux créer tes tables
+        ssl: {
+          rejectUnauthorized: false, // INDISPENSABLE pour Supabase
+        },
+      }),
     }),
     // BUSINESS MODULES
     UsersModule,
