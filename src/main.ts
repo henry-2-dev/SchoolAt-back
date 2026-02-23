@@ -6,4 +6,4 @@ async function bootstrap() {
   app.enableCors(); // Autorise les requêtes Cross-Origin (Frontend -> Backend)
   await app.listen(process.env.PORT ?? 3000);
 }
-void bootstrap();
+export default bootstrap();

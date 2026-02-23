@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // ===== MODULES =====
@@ -13,7 +13,6 @@ import { PostMediaModule } from './post_media/post_media.module';
 import { PostSharesModule } from './post_shares/post_shares.module';
 import { PostCommentsModule } from './post_comments/post_comments.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { config } from 'process';
 
 @Module({
   imports: [
@@ -23,6 +22,9 @@ import { config } from 'process';
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false, // INDISPENSABLE pour Supabase sur Vercel
+      },
     }),
     // BUSINESS MODULES
     UsersModule,
