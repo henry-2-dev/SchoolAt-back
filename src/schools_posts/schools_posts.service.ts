@@ -37,7 +37,11 @@ export class SchoolsPostsService {
             }))
           : [],
 
-        nbviewpost: post.views ?? 0,
+        nbviewpost:
+          (post.views ?? 0) +
+          (post.comments ? post.comments.length : 0) +
+          (post.saves ?? 0) +
+          (post.shares ? post.shares.length : 0),
         nbcommentpost: post.comments ? post.comments.length : 0,
         nbsavepost: post.saves ?? 0,
         nbsharepost: post.shares ? post.shares.length : 0,
@@ -64,6 +68,7 @@ export class SchoolsPostsService {
       content: dto.content,
       description: dto.description,
       school: { id: dto.schoolId } as any,
+      media: dto.media ? dto.media : [],
     } as any);
     return this.postRepository.save(post);
   }

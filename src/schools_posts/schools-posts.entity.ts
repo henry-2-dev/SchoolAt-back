@@ -29,7 +29,10 @@ export class SchoolPost {
   @ManyToOne(() => School, (school) => school.posts, { onDelete: 'CASCADE' })
   school: School;
 
-  @OneToMany(() => PostMedia, (media) => media.post)
+  @Column()
+  schoolId: string;
+
+  @OneToMany(() => PostMedia, (media) => media.post, { cascade: true })
   media: PostMedia[];
 
   @OneToMany(() => PostComment, (comment) => comment.post)
@@ -40,6 +43,10 @@ export class SchoolPost {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ default: 0 })
   views: number;
+
+  @Column({ default: 0 })
   saves: number;
 }
