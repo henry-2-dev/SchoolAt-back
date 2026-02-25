@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PostComment } from './post-comments.entity';
 import { CreatePostCommentDto } from './dto/create-post-comment.dto';
 import { UpdatePostCommentDto } from './dto/update-post-comment.dto';
+import { PostComment } from './post-comments.entity';
 
 @Injectable()
 export class PostCommentsService {
@@ -13,20 +13,24 @@ export class PostCommentsService {
   ) {}
 
   create(dto: CreatePostCommentDto) {
-    const comment = this.commentRepository.create(dto);
+    const comment = this.commentRepository.create({
+      content: dto.content,
+      userId: dto.userId,
+      postId: dto.postId,
+    });
     return this.commentRepository.save(comment);
   }
 
   findAll() {
     return this.commentRepository.find({
-      relations: ['post', 'author'],
+      relations: ['post', 'user'],
     });
   }
 
   async findOne(id: string) {
     const comment = await this.commentRepository.findOne({
       where: { id },
-      relations: ['post', 'author'],
+      relations: ['post', 'user'],
     });
 
     if (!comment) throw new NotFoundException('Comment not found');

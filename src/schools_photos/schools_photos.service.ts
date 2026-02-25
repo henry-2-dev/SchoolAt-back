@@ -16,6 +16,7 @@ export class SchoolsPhotosService {
   create(dto: CreateSchoolPhotoDto) {
     const photo = this.photoRepository.create({
       photoUrl: dto.photoUrl,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       school: { id: dto.schoolId } as any,
     });
     return this.photoRepository.save(photo);

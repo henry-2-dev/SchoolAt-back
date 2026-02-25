@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SchoolPost } from './schools-posts.entity';
 import { POSTDTO } from '../feeddto';
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
+import { SchoolPost } from './schools-posts.entity';
 
 @Injectable()
 export class SchoolsPostsService {
@@ -17,6 +17,12 @@ export class SchoolsPostsService {
     try {
       const posts = await this.postRepository.find({
         relations: ['school', 'media', 'comments', 'comments.user', 'shares'],
+        order: {
+          createdAt: 'DESC',
+          comments: {
+            createdAt: 'ASC',
+          },
+        },
       });
 
       return posts.map((post) => ({
