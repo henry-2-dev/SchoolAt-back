@@ -1,10 +1,15 @@
 import {
+    Column,
+    CreateDateColumn,
     Entity,
-    PrimaryGeneratedColumn
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PostType } from '../common/enums/post_type.enum';
 import { PostComment } from '../post_comments/post-comments.entity';
 import { PostMedia } from '../post_media/post-media.entity';
+import { PostSave } from '../post_saves/post-saves.entity';
 import { PostShare } from '../post_shares/post-shares.entity';
 import { School } from '../schools/schools.entity';
 

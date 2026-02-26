@@ -1,10 +1,14 @@
 import {
+    Column,
+    CreateDateColumn,
+    Entity,
     OneToMany,
-    PrimaryGeneratedColumn
+    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../common/enums/role.enum';
 import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
 import { PostComment } from '../post_comments/post-comments.entity';
+import { PostSave } from '../post_saves/post-saves.entity';
 import { PostShare } from '../post_shares/post-shares.entity';
 import { SchoolComment } from '../schools_comments/schools-comments.entity';
 

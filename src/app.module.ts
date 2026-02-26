@@ -7,6 +7,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PinnedSchoolsModule } from './pinned_schools/pinned_schools.module';
 import { PostCommentsModule } from './post_comments/post_comments.module';
 import { PostMediaModule } from './post_media/post_media.module';
+import { PostSavesModule } from './post_saves/post_saves.module';
 import { PostSharesModule } from './post_shares/post_shares.module';
 import { SchoolsModule } from './schools/schools.module';
 import { SchoolsCommentsModule } from './schools_comments/schools_comments.module';
