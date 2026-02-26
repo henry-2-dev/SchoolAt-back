@@ -15,8 +15,8 @@ export class PostCommentsService {
   create(dto: CreatePostCommentDto) {
     const comment = this.commentRepository.create({
       content: dto.content,
-      userId: dto.userId,
-      postId: dto.postId,
+      user: { id: dto.userId } as any,
+      post: { id: dto.postId } as any,
     });
     return this.commentRepository.save(comment);
   }

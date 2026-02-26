@@ -1,10 +1,9 @@
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    ManyToOne,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { SchoolPost } from '../schools_posts/schools-posts.entity';
 import { User } from '../users/user.entity';
@@ -17,19 +16,10 @@ export class PostComment {
   @Column('text')
   content: string;
 
-  @Column()
-  userId: string;
-
   @ManyToOne(() => User, (user) => user.postComments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  postId: string;
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @ManyToOne(() => SchoolPost, (post) => post.comments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'postId' })
   post: SchoolPost;
 
   @CreateDateColumn()
