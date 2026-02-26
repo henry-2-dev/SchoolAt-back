@@ -15,15 +15,16 @@ export class SchoolsPostsService {
 
   async findAllFormatted(): Promise<POSTDTO[]> {
     try {
-      const posts = await this.postRepository.find({
-        relations: ['school', 'media', 'comments', 'comments.user', 'shares'],
-        order: {
-          createdAt: 'DESC',
-          comments: {
-            createdAt: 'ASC',
-          },
-        },
-      });
+      const posts = await this.postRepository
+        .createQueryBuilder('post')
+        .leftJoinAndSelect('post.school', 'school')
+        .leftJoinAndSelect('post.media', 'media')
+        .leftJoinAndSelect('post.comments', 'comments')
+        .leftJoinAndSelect('comments.user', 'user')
+        .leftJoinAndSelect('post.shares', 'shares')
+        .orderBy('post.createdAt', 'DESC')
+        .addOrderBy('comments.createdAt', 'ASC')
+        .getMany();
 
       return posts.map((post) => ({
         idPost: post.id,
@@ -69,10 +70,12 @@ export class SchoolsPostsService {
   }
 
   create(dto: CreateSchoolPostDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const post = this.postRepository.create({
       type: dto.type,
       content: dto.content,
       description: dto.description,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       school: { id: dto.schoolId } as any,
       media: dto.media ? dto.media : [],
     } as any);
