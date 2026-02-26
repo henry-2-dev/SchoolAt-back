@@ -3,16 +3,16 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // ===== MODULES =====
-import { UsersModule } from './users/users.module';
-import { SchoolsModule } from './schools/schools.module';
-import { SchoolsPhotosModule } from './schools_photos/schools_photos.module';
-import { SchoolsPostsModule } from './schools_posts/schools_posts.module';
-import { SchoolsCommentsModule } from './schools_comments/schools_comments.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PinnedSchoolsModule } from './pinned_schools/pinned_schools.module';
+import { PostCommentsModule } from './post_comments/post_comments.module';
 import { PostMediaModule } from './post_media/post_media.module';
 import { PostSharesModule } from './post_shares/post_shares.module';
-import { PostCommentsModule } from './post_comments/post_comments.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { SchoolsModule } from './schools/schools.module';
+import { SchoolsCommentsModule } from './schools_comments/schools_comments.module';
+import { SchoolsPhotosModule } from './schools_photos/schools_photos.module';
+import { SchoolsPostsModule } from './schools_posts/schools_posts.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -40,6 +40,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     PostMediaModule,
     PostSharesModule,
     PostCommentsModule,
+    PostSavesModule,
     CloudinaryModule,
   ],
   controllers: [],

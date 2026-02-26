@@ -1,16 +1,12 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToMany,
-  CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn
 } from 'typeorm';
 import { PostType } from '../common/enums/post_type.enum';
-import { School } from '../schools/schools.entity';
-import { PostMedia } from '../post_media/post-media.entity';
 import { PostComment } from '../post_comments/post-comments.entity';
+import { PostMedia } from '../post_media/post-media.entity';
 import { PostShare } from '../post_shares/post-shares.entity';
+import { School } from '../schools/schools.entity';
 
 @Entity('school_posts')
 export class SchoolPost {
@@ -41,12 +37,12 @@ export class SchoolPost {
   @OneToMany(() => PostShare, (share) => share.post)
   shares: PostShare[];
 
+  @OneToMany(() => PostSave, (save) => save.post)
+  saves: PostSave[];
+
   @CreateDateColumn()
   createdAt: Date;
 
   @Column({ default: 0 })
   views: number;
-
-  @Column({ default: 0 })
-  saves: number;
 }

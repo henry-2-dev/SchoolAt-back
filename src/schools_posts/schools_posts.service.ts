@@ -22,6 +22,8 @@ export class SchoolsPostsService {
         .leftJoinAndSelect('post.comments', 'comments')
         .leftJoinAndSelect('comments.user', 'user')
         .leftJoinAndSelect('post.shares', 'shares')
+        .leftJoinAndSelect('post.saves', 'saves')
+        .leftJoinAndSelect('saves.user', 'save_user')
         .orderBy('post.createdAt', 'DESC')
         .addOrderBy('comments.createdAt', 'ASC')
         .getMany();
@@ -47,11 +49,18 @@ export class SchoolsPostsService {
         nbviewpost:
           (post.views ?? 0) +
           (post.comments ? post.comments.length : 0) +
-          (post.saves ?? 0) +
+          (post.saves ? post.saves.length : 0) +
           (post.shares ? post.shares.length : 0),
         nbcommentpost: post.comments ? post.comments.length : 0,
-        nbsavepost: post.saves ?? 0,
+        nbsavepost: post.saves ? post.saves.length : 0,
         nbsharepost: post.shares ? post.shares.length : 0,
+
+        isSavedByUser: post.saves
+          ? post.saves.some(
+              (save) =>
+                save.user?.id === '00000000-0000-4000-8000-000000000001',
+            )
+          : false,
 
         commentpost: post.comments
           ? post.comments.map((comment) => ({

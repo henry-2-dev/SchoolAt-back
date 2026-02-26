@@ -1,14 +1,11 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  CreateDateColumn,
+    OneToMany,
+    PrimaryGeneratedColumn
 } from 'typeorm';
 import { Role } from '../common/enums/role.enum';
+import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
 import { PostComment } from '../post_comments/post-comments.entity';
 import { PostShare } from '../post_shares/post-shares.entity';
-import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
 import { SchoolComment } from '../schools_comments/schools-comments.entity';
 
 @Entity('users')
@@ -46,4 +43,7 @@ export class User {
 
   @OneToMany(() => SchoolComment, (comment) => comment.user)
   schoolComments: SchoolComment[];
+
+  @OneToMany(() => PostSave, (save) => save.user)
+  postSaves: PostSave[];
 }
