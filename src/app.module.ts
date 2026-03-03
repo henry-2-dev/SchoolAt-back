@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // ===== MODULES =====
+import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PinnedSchoolsModule } from './pinned_schools/pinned_schools.module';
 import { PostCommentsModule } from './post_comments/post_comments.module';
@@ -43,6 +44,7 @@ import { UsersModule } from './users/users.module';
     PostCommentsModule,
     PostSavesModule,
     CloudinaryModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

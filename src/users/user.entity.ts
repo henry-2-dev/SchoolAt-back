@@ -1,9 +1,9 @@
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../common/enums/role.enum';
 import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
@@ -18,7 +18,10 @@ export class User {
   id: string;
 
   @Column({ unique: true })
-  supabaseId: string;
+  clerkId: string;
+
+  @Column({ nullable: true })
+  phoneNumber: string;
 
   @Column()
   fullName: string;

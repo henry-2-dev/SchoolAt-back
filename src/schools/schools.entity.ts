@@ -1,14 +1,14 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  CreateDateColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
-import { SchoolPost } from '../schools_posts/schools-posts.entity';
-import { SchoolsPhotos } from '../schools_photos/schools-photos.entity';
-import { SchoolComment } from '../schools_comments/schools-comments.entity';
 import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
+import { SchoolComment } from '../schools_comments/schools-comments.entity';
+import { SchoolsPhotos } from '../schools_photos/schools-photos.entity';
+import { SchoolPost } from '../schools_posts/schools-posts.entity';
 
 @Entity('schools')
 export class School {
@@ -16,7 +16,7 @@ export class School {
   id: string;
 
   @Column({ unique: true })
-  supabaseId: string;
+  clerkId: string;
 
   @Column()
   name: string;

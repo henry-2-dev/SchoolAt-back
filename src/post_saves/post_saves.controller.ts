@@ -15,4 +15,9 @@ export class PostSavesController {
     const saved = await this.postSavesService.isSaved(body.userId, body.postId);
     return { saved };
   }
+
+  @Post('user')
+  async getUserSaves(@Body() body: { userId: string }) {
+    return this.postSavesService.getUserSaves(body.userId);
+  }
 }
