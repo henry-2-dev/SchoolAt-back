@@ -1,9 +1,9 @@
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../common/enums/role.enum';
 import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
@@ -17,7 +17,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   clerkId: string;
 
   @Column({ nullable: true })
