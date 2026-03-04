@@ -107,7 +107,13 @@ export class AuthController {
       const phoneArray = data.phone_numbers as
         | Array<{ phone_number: string }>
         | undefined;
-      const phoneNumber = phoneArray?.[0]?.phone_number;
+      let phoneNumber = phoneArray?.[0]?.phone_number;
+
+      // Fallback sur unsafe_metadata si le champ officiel est vide (Cameroun/Autre non supporté par Clerk)
+      if (!phoneNumber) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        phoneNumber = data.unsafe_metadata?.phoneNumber as string | undefined;
+      }
 
       // Upsert de l'utilisateur
       await this.usersService.upsertClerkUser({
