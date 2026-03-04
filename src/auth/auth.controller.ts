@@ -1,15 +1,15 @@
+import type { RawBodyRequest } from '@nestjs/common';
 import {
     BadRequestException,
     Body,
     Controller,
     Headers,
     Post,
-    RawBodyRequest,
     Req,
     UnauthorizedException,
 } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'crypto';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { UsersService } from '../users/users.service';
 
 @Controller('auth')
@@ -29,8 +29,6 @@ export class AuthController {
     const secret = process.env.CLERK_WEBHOOK_SECRET;
     if (!secret) {
       throw new Error(
-        "",
-      
         "CLERK_WEBHOOK_SECRET non défini dans les variables d'env",
       );
     }
@@ -38,13 +36,16 @@ export class AuthController {
     // 1. Vérifier que le timestamp n'est pas trop vieux (tolérance 5 minutes)
     const now = Math.floor(Date.now() / 1000);
     const ts = parseInt(svixTimestamp, 10);
-    if (Math.abs(now - ts) > 300) {
+    if (isNaN(ts) || Math.abs(now - ts) > 300) {
       throw new UnauthorizedException('Webhook timestamp trop ancien ou futur');
     }
 
     // 2. Construire le message signé : "{svix-id}.{svix-timestamp}.{rawBody}"
     const signedContent = `${svixId}.${svixTimestamp}.${rawBody.toString('utf8')}`;
- 3. Décoder le secret (format: nst secr
+
+    // 3. Décoder le secret (format: "whsec_BASE64")
+    const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+
     // 4. Calculer HMAC-SHA256
     const computedHmac = createHmac('sha256', secretBytes)
       .update(signedContent)
@@ -108,7 +109,8 @@ export class AuthController {
         | undefined;
       const phoneNumber = phoneArray?.[0]?.phone_number;
 
-
+      // Upsert de l'utilisateur
+      await this.usersService.upsertClerkUser({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         clerkId: data.id as string,
         email: email || '',
@@ -119,9 +121,7 @@ export class AuthController {
       });
 
       console.log(
-        `[Webhook]
-         Utilisateur ${type === 'user.created' ? 'créé' : 'mis à jour'}: ${email}`,,
-      
+        `[Webhook] Utilisateur ${type === 'user.created' ? 'créé' : 'mis à jour'}: ${email}`,
       );
     }
 
@@ -131,4 +131,5 @@ export class AuthController {
 
 interface ClerkWebhookEvent {
   data: any;
- }
+  type: string;
+}

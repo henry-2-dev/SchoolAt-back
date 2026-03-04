@@ -1,8 +1,12 @@
 import {
+    Body,
     Controller,
     Delete,
+    Get,
     Param,
-    Query
+    Patch,
+    Post,
+    Query,
 } from '@nestjs/common';
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
