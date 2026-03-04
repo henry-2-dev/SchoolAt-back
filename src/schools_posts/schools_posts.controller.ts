@@ -1,15 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
+    Controller,
+    Delete,
+    Param,
+    Query
 } from '@nestjs/common';
-import { SchoolsPostsService } from './schools_posts.service';
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
+import { SchoolsPostsService } from './schools_posts.service';
 
 @Controller('school-posts')
 export class SchoolsPostsController {
@@ -21,8 +18,8 @@ export class SchoolsPostsController {
   }
 
   @Get('formatted')
-  findAllFormatted() {
-    return this.postsService.findAllFormatted();
+  findAllFormatted(@Query('userId') userId?: string) {
+    return this.postsService.findAllFormatted(userId);
   }
 
   @Get()

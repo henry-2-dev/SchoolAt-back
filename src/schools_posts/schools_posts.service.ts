@@ -13,7 +13,7 @@ export class SchoolsPostsService {
     private readonly postRepository: Repository<SchoolPost>,
   ) {}
 
-  async findAllFormatted(): Promise<POSTDTO[]> {
+  async findAllFormatted(userId?: string): Promise<POSTDTO[]> {
     try {
       const posts = await this.postRepository
         .createQueryBuilder('post')
@@ -27,6 +27,9 @@ export class SchoolsPostsService {
         .orderBy('post.createdAt', 'DESC')
         .addOrderBy('comments.createdAt', 'ASC')
         .getMany();
+
+      // Utiliser l'userId fourni ou un placeholder si absent
+      const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
 
       return posts.map((post) => ({
         idPost: post.id,
@@ -56,10 +59,7 @@ export class SchoolsPostsService {
         nbsharepost: post.shares ? post.shares.length : 0,
 
         isSavedByUser: post.saves
-          ? post.saves.some(
-              (save) =>
-                save.user?.id === '00000000-0000-4000-8000-000000000001',
-            )
+          ? post.saves.some((save) => save.user?.id === targetUserId)
           : false,
 
         commentpost: post.comments
