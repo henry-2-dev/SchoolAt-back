@@ -83,9 +83,6 @@ export class SchoolsService {
       const newSchool = this.schoolRepository.create(dto);
       const saved = await this.schoolRepository.save(newSchool);
       console.log(
-        
-       ,
-      
         '[SchoolsService] New school saved successfully with ID:',
         saved.id,
       );
