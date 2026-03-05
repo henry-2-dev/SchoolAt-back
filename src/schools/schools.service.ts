@@ -62,16 +62,38 @@ export class SchoolsService {
   }
 
   async upsertClerkSchool(dto: CreateSchoolDto) {
-    const school = await this.schoolRepository.findOne({
-      where: { clerkId: dto.clerkId },
-    });
+    console.log('[SchoolsService] Upsert school for clerkId:', dto.clerkId);
 
-    if (school) {
-      return await this.schoolRepository.save({ ...school, ...dto });
+    if (!dto.clerkId) {
+      console.error('[SchoolsService] Sync failed: clerkId is missing in DTO');
+      throw new Error('clerkId is required for sync');
     }
 
-    const newSchool = this.schoolRepository.create(dto);
-    return await this.schoolRepository.save(newSchool);
+    try {
+      const school = await this.schoolRepository.findOne({
+        where: { clerkId: dto.clerkId },
+      });
+
+      if (school) {
+        console.log('[SchoolsService] Found existing school, updating...');
+        return await this.schoolRepository.save({ ...school, ...dto });
+      }
+
+      console.log('[SchoolsService] Creating new school record...');
+      const newSchool = this.schoolRepository.create(dto);
+      const saved = await this.schoolRepository.save(newSchool);
+      console.log(
+        
+       ,
+      
+        '[SchoolsService] New school saved successfully with ID:',
+        saved.id,
+      );
+      return saved;
+    } catch (error) {
+      console.error('[SchoolsService] Error during upsert:', error);
+      throw error;
+    }
   }
 
   async findAll() {

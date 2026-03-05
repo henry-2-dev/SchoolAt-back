@@ -27,7 +27,7 @@ export class School {
   @Column()
   status: string; // public / privé
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column('decimal')
