@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
-import { School } from './schools.entity';
+import { PROFILESCHOOL, SchoolGeoDTO } from 'src/feeddto';
+import { ILike, Repository } from 'typeorm';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
-import { PROFILESCHOOL, SchoolGeoDTO } from 'src/feeddto';
+import { School } from './schools.entity';
 
 @Injectable()
 export class SchoolsService {
@@ -59,6 +59,19 @@ export class SchoolsService {
   async create(dto: CreateSchoolDto) {
     const school = this.schoolRepository.create(dto);
     return this.schoolRepository.save(school);
+  }
+
+  async upsertClerkSchool(dto: CreateSchoolDto) {
+    const school = await this.schoolRepository.findOne({
+      where: { clerkId: dto.clerkId },
+    });
+
+    if (school) {
+      return await this.schoolRepository.save({ ...school, ...dto });
+    }
+
+    const newSchool = this.schoolRepository.create(dto);
+    return await this.schoolRepository.save(newSchool);
   }
 
   async findAll() {

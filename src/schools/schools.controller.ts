@@ -1,16 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
 } from '@nestjs/common';
-import { SchoolsService } from './schools.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
+import { SchoolsService } from './schools.service';
 
 @Controller('schools')
 export class SchoolsController {
@@ -61,5 +61,11 @@ export class SchoolsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.schoolsService.remove(id);
+  }
+
+  @Post('sync')
+  syncSchool(@Body() dto: CreateSchoolDto) {
+    console.log('[SchoolSync] Synchronisation reçue pour:', dto.name);
+    return this.schoolsService.upsertClerkSchool(dto);
   }
 }
