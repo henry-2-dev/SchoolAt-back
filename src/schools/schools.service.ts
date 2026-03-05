@@ -13,12 +13,20 @@ export class SchoolsService {
     private readonly schoolRepository: Repository<School>,
   ) {}
 
+  /**
+   * Récupère le profil d'une école par son ID (UUID) ou son clerkId.
+   */
   async findProfileSchoolById(
-    id: string,
+    idOrClerkId: string,
     userId?: string,
   ): Promise<PROFILESCHOOL | null> {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        idOrClerkId,
+      );
+
     const school = await this.schoolRepository.findOne({
-      where: { id },
+      where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
       relations: [
         'posts',
         'photos',

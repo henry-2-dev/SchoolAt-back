@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserProfileDto } from './dto/user-profile.dto';
 import { User } from './user.entity';
 @Injectable()
 export class UsersService {
@@ -67,6 +68,37 @@ export class UsersService {
       console.error('[UsersService] Error during user upsert:', error);
       throw error;
     }
+  }
+
+  async findProfileUserByClerkOrId(
+    idOrClerkId: string,
+  ): Promise<UserProfileDto | null> {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        idOrClerkId,
+      );
+
+    const user = await this.userRepository.findOne({
+      where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
+      relations: ['pinnedSchools', 'schoolComments'],
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      clerkId: user.clerkId,
+      fullName: user.fullName,
+      email: user.email,
+      profilePhoto: user.profilePhoto ?? '',
+      city: 'Cameroun', // Valeur par défaut ou à extraire si dispo
+      role: user.role,
+      stats: {
+        schoolsFollowed: user.pinnedSchools?.length || 0,
+        comments: user.schoolComments?.length || 0,
+        pins: user.pinnedSchools?.length || 0, // Idem que followed pour l'instant
+      },
+    };
   }
 
   async remove(id: string) {
