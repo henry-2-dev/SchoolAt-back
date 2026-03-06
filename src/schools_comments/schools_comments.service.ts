@@ -1,25 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SchoolComment } from './schools-comments.entity';
+import { SchoolsService } from '../schools/schools.service';
+import { UsersService } from '../users/users.service';
 import { CreateSchoolCommentDto } from './dto/create-school-comment.dto';
 import { UpdateSchoolCommentDto } from './dto/update-school-comment.dto';
+import { SchoolComment } from './schools-comments.entity';
 
 @Injectable()
 export class SchoolsCommentsService {
   constructor(
     @InjectRepository(SchoolComment)
     private readonly commentRepository: Repository<SchoolComment>,
+    private readonly usersService: UsersService,
+    private readonly schoolsService: SchoolsService,
   ) {}
 
   /** Créer un avis sur une école */
-  create(dto: CreateSchoolCommentDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  async create(dto: CreateSchoolCommentDto) {
+    const user = await this.usersService.findByIdOrClerkId(dto.userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const school = await this.schoolsService.findByIdOrClerkId(dto.schoolId);
+    if (!school) throw new NotFoundException('School not found');
+
     const comment = this.commentRepository.create({
       content: dto.content,
       rating: dto.rating,
-      user: { id: dto.userId },
-      school: { id: dto.schoolId },
+      user: user,
+      school: school,
     } as any);
     return this.commentRepository.save(comment);
   }
@@ -33,8 +42,11 @@ export class SchoolsCommentsService {
 
   /** Récupérer tous les avis d'une école, avec la note moyenne */
   async findBySchool(schoolId: string) {
+    const school = await this.schoolsService.findByIdOrClerkId(schoolId);
+    if (!school) throw new NotFoundException('School not found');
+
     const comments = await this.commentRepository.find({
-      where: { school: { id: schoolId } },
+      where: { school: { id: school.id } },
       relations: ['user', 'school'],
     });
 

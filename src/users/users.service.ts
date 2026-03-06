@@ -17,6 +17,20 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
+  /**
+   * Trouve un utilisateur par son ID (UUID) ou son clerkId.
+   */
+  async findByIdOrClerkId(idOrClerkId: string): Promise<User | null> {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        idOrClerkId,
+      );
+
+    return this.userRepository.findOne({
+      where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
+    });
+  }
+
   async findAll() {
     return await this.userRepository.find({
       relations: ['posts', 'comments', 'shares', 'pinnedSchools'],

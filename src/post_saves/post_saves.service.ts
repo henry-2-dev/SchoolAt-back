@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UsersService } from '../users/users.service';
 import { PostSave } from './post-saves.entity';
 
 @Injectable()
@@ -8,12 +9,16 @@ export class PostSavesService {
   constructor(
     @InjectRepository(PostSave)
     private readonly saveRepository: Repository<PostSave>,
+    private readonly usersService: UsersService,
   ) {}
 
   async toggleSave(userId: string, postId: string) {
+    const user = await this.usersService.findByIdOrClerkId(userId);
+    if (!user) throw new NotFoundException('User not found');
+
     const existingSave = await this.saveRepository.findOne({
       where: {
-        user: { id: userId },
+        user: { id: user.id },
         post: { id: postId },
       },
     });
@@ -23,7 +28,7 @@ export class PostSavesService {
       return { saved: false };
     } else {
       const newSave = this.saveRepository.create({
-        user: { id: userId } as any,
+        user: user,
         post: { id: postId } as any,
       });
       await this.saveRepository.save(newSave);
@@ -32,9 +37,12 @@ export class PostSavesService {
   }
 
   async isSaved(userId: string, postId: string) {
+    const user = await this.usersService.findByIdOrClerkId(userId);
+    if (!user) return false;
+
     const count = await this.saveRepository.count({
       where: {
-        user: { id: userId },
+        user: { id: user.id },
         post: { id: postId },
       },
     });
@@ -42,8 +50,11 @@ export class PostSavesService {
   }
 
   async getUserSaves(userId: string) {
+    const user = await this.usersService.findByIdOrClerkId(userId);
+    if (!user) throw new NotFoundException('User not found');
+
     const saves = await this.saveRepository.find({
-      where: { user: { id: userId } },
+      where: { user: { id: user.id } },
       relations: [
         'post',
         'post.school',
@@ -58,6 +69,7 @@ export class PostSavesService {
 
     return saves.map((save) => {
       const post = save.post;
+      // ... mapping logic remains the same ...
       return {
         idPost: post.id,
         ppschool: post.school?.profilePhoto,
