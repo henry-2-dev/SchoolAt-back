@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { POSTDTO } from '../feeddto';
+import { SchoolsService } from '../schools/schools.service';
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
 import { SchoolPost } from './schools-posts.entity';
@@ -11,6 +12,7 @@ export class SchoolsPostsService {
   constructor(
     @InjectRepository(SchoolPost)
     private readonly postRepository: Repository<SchoolPost>,
+    private readonly schoolsService: SchoolsService,
   ) {}
 
   async findAllFormatted(userId?: string): Promise<POSTDTO[]> {
@@ -78,14 +80,19 @@ export class SchoolsPostsService {
     }
   }
 
-  create(dto: CreateSchoolPostDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  async create(dto: CreateSchoolPostDto) {
+    // Résoudre l'école par ID ou Clerk ID
+    const school = await this.schoolsService.findByIdOrClerkId(dto.schoolId);
+
+    if (!school) {
+      throw new NotFoundException(`School with ID ${dto.schoolId} not found`);
+    }
+
     const post = this.postRepository.create({
       type: dto.type,
       content: dto.content,
       description: dto.description,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      school: { id: dto.schoolId } as any,
+      school: school,
       media: dto.media ? dto.media : [],
     } as any);
     return this.postRepository.save(post);

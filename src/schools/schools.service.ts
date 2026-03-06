@@ -64,6 +64,20 @@ export class SchoolsService {
     };
   }
 
+  /**
+   * Trouve une école par son ID (UUID) ou son clerkId.
+   */
+  async findByIdOrClerkId(idOrClerkId: string): Promise<School | null> {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        idOrClerkId,
+      );
+
+    return this.schoolRepository.findOne({
+      where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
+    });
+  }
+
   async create(dto: CreateSchoolDto) {
     const school = this.schoolRepository.create(dto);
     return this.schoolRepository.save(school);
