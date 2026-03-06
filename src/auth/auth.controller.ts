@@ -1,84 +1,15 @@
 import type { RawBodyRequest } from '@nestjs/common';
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Headers,
-    Post,
-    Req,
-    UnauthorizedException,
-} from '@nestjs/common';
-import { createHmac, timingSafeEqual } from 'crypto';
 import type { Request } from 'express';
-import { UsersService } from '../users/users.service';
+import { SchoolsService } from '../schools/schools.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly schoolsService: SchoolsService,
+  ) {}
 
-  /**
-   * Vérifie la signature Clerk du webhook selon le protocole svix/HMAC-SHA256.
-   * Utilise uniquement le module `crypto` natif de Node.js.
-   */
-  private verifyClerkSignature(
-    rawBody: Buffer,
-    svixId: string,
-    svixTimestamp: string,
-    svixSignature: string,
-  ): void {
-    console.log('[Webhook] Début vérification signature...');
-    const secret = process.env.CLERK_WEBHOOK_SECRET;
-    if (!secret) {
-      console.error('[Webhook] ERREUR: CLERK_WEBHOOK_SECRET non défini');
-      throw new Error(
-        "CLERK_WEBHOOK_SECRET non défini dans les variables d'env",
-      );
-    }
-
-    // 1. Vérifier que le timestamp n'est pas trop vieux (tolérance 5 minutes)
-    const now = Math.floor(Date.now() / 1000);
-    const ts = parseInt(svixTimestamp, 10);
-    if (isNaN(ts) || Math.abs(now - ts) > 300) {
-      console.error('[Webhook] ERREUR: Timestamp invalide ou trop vieux', {
-        now,
-        ts,
-      });
-      throw new UnauthorizedException('Webhook timestamp trop ancien ou futur');
-    }
-
-    // 2. Construire le message signé
-    const signedContent = `${svixId}.${svixTimestamp}.${rawBody.toString('utf8')}`;
-
-    // 3. Décoder le secret
-    const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
-
-    // 4. Calculer HMAC-SHA256
-    const computedHmac = createHmac('sha256', secretBytes)
-      .update(signedContent)
-      .digest('base64');
-
-    // 5. Comparer avec chaque signature envoyée
-    const signatures = svixSignature.split(' ');
-    const isValid = signatures.some((sig) => {
-      const sigValue = sig.replace(/^v1,/, '');
-      try {
-        const match = timingSafeEqual(
-          Buffer.from(computedHmac, 'base64'),
-          Buffer.from(sigValue, 'base64'),
-        );
-        return match;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
-        return false;
-      }
-    });
-
-    if (!isValid) {
-      console.error('[Webhook] ERREUR: Signature invalide');
-      throw new UnauthorizedException('Signature Clerk invalide');
-    }
-    console.log('[Webhook] Signature validée ✅');
-  }
+  // ... verifyClerkSignature code ... (keep it)
 
   @Post('webhook')
   async handleClerkWebhook(
@@ -119,41 +50,70 @@ export class AuthController {
 
     if (type === 'user.created' || type === 'user.updated') {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const email = data.email_addresses?.[0]?.email_address as
-          | string
-          | undefined;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const firstName = (data.first_name as string) || '';
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const lastName = (data.last_name as string) || '';
+        const email =
+          
 
+        // eslint-disable-n
+         ext-line @typescript-eslint/no-unsafe-member-access
+        const accountType =
+          (data.unsafe_metadata?.accountType as string) || 'user';
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const phoneArray = data.phone_numbers as
-          | Array<{ phone_number: string }>
-          | undefined;
-        let phoneNumber = phoneArray?.[0]?.phone_number;
+        const clerkId = data.id as string;
 
-        if (!phoneNumber) {
+        console.log(`[Webhook] Sync ${accountType}: ${email} (${clerkId})`);
+
+        if (accountType === 'school') {
+          // Synchronisation d'une École
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          phoneNumber = data.unsafe_metadata?.phoneNumber as string | undefined;
+          const metadata = data.unsafe_metadata || {};
+          await t
+             his.schoolsService.upsertClerkSch
+             ool({
+             
+            clerkId,
+            name:
+              (metadata.fullName as string) ||
+              (data.first_name as string) ||
+              email,
+            email: email,
+            type: 
+             metadata.schoolType as string,
+             
+            status: metadata.schoolStatus as string,
+            city: metadata.city as string,
+            latitude: metadata.latitude as number,
+            longitude: metadata.longitude as number,
+            phone:
+              (metadata.phoneNumber as string) ||
+              (data.phone_numbers?.[0]?.phone_number as string),
+          });
+          console.log(`[Webhook] École ${email} synchronisée ✅`);
+        } else {
+          // Synchronisation d'un Utilisateur standard
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const firstName = (data.first_name as string) || '';
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const lastName = (data.last_name as string) || '';
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          const metadata = data.unsafe_metadata || {};
+
+             
+             
+          let phoneNumber = data.phone_numbers?.[0]?.phone_number as string;
+          if (!phoneNumber) phoneNumber = metadata.phoneNumber as string;
+
+          await this.usersService.upsertClerkUser({
+            clerkId,
+            email: email,
+            fullName:
+              (metadata.fullName as string) ||
+              `${firstName} ${lastName}`.trim(),
+            phoneNumber: phoneNumber || undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            profilePhoto: data.image_url as string,
+          });
+          console.log(`[Webhook] Utilisateur ${email} synchronisé ✅`);
         }
-
-        console.log(`[Webhook] Sync utilisateur: ${email}`);
-
-        await this.usersService.upsertClerkUser({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          clerkId: data.id as string,
-          email: email || '',
-          fullName: `${firstName} ${lastName}`.trim(),
-          phoneNumber: phoneNumber || undefined,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          profilePhoto: data.image_url as string,
-        });
-
-        console.log(
-          `[Webhook] Utilisateur ${email} synchronisé avec succès ✅`,
-        );
       } catch (dbError) {
         console.error("[Webhook] ERREUR BDD lors de l'insertion:", dbError);
         throw dbError;
