@@ -1,6 +1,17 @@
 import type { RawBodyRequest } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Headers,
+    Post,
+    Req,
+    UnauthorizedException,
+} from '@nestjs/common';
+import { createHmac, timingSafeEqual } from 'crypto';
 import type { Request } from 'express';
 import { SchoolsService } from '../schools/schools.service';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
@@ -9,7 +20,52 @@ export class AuthController {
     private readonly schoolsService: SchoolsService,
   ) {}
 
-  // ... verifyClerkSignature code ... (keep it)
+  /**
+   * Vérifie la signature Clerk du webhook selon le protocole svix/HMAC-SHA256.
+   */
+  private verifyClerkSignature(
+    rawBody: Buffer,
+    svixId: string,
+    svixTimestamp: string,
+    svixSignature: string,
+  ): void {
+    const secret = process.env.CLERK_WEBHOOK_SECRET;
+    if (!secret) {
+      console.error('[Webhook] ERREUR: CLERK_WEBHOOK_SECRET non défini');
+      throw new Error(
+        "CLERK_WEBHOOK_SECRET non défini dans les variables d'env",
+      );
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const ts = parseInt(svixTimestamp, 10);
+    if (isNaN(ts) || Math.abs(now - ts) > 300) {
+      throw new UnauthorizedException('Webhook timestamp trop ancien ou futur');
+    }
+
+    const signedContent = `${svixId}.${svixTimestamp}.${rawBody.toString('utf8')}`;
+    const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+    const computedHmac = createHmac('sha256', secretBytes)
+      .update(signedContent)
+      .digest('base64');
+
+    const signatures = svixSignature.split(' ');
+    const isValid = signatures.some((sig) => {
+      const sigValue = sig.replace(/^v1,/, '');
+      try {
+        return timingSafeEqual(
+          Buffer.from(computedHmac, 'base64'),
+          Buffer.from(sigValue, 'base64'),
+        );
+      } catch (e) {
+        return false;
+      }
+    });
+
+    if (!isValid) {
+      throw new UnauthorizedException('Signature Clerk invalide');
+    }
+  }
 
   @Post('webhook')
   async handleClerkWebhook(
@@ -19,66 +75,45 @@ export class AuthController {
     @Headers('svix-timestamp') svixTimestamp: string,
     @Headers('svix-signature') svixSignature: string,
   ) {
-    console.log('[Webhook] Nouvelle requête reçue');
-
-    // Vérification de la signature
     if (!svixId || !svixTimestamp || !svixSignature) {
-      console.warn('[Webhook] Headers Svix manquants');
       throw new BadRequestException('En-têtes svix manquants');
     }
 
     const rawBody = req.rawBody;
     if (!rawBody) {
-      console.error(
-        '[Webhook] Raw body manquant (Vérifier rawBody:true dans main.ts)',
-      );
       throw new BadRequestException('Raw body indisponible');
     }
 
     try {
       this.verifyClerkSignature(rawBody, svixId, svixTimestamp, svixSignature);
-    } catch (e) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    } catch (e: any) {
       console.error('[Webhook] Échec vérification signature:', e.message);
       throw e;
     }
 
-    // Traitement de l'événement
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { data, type } = body;
     console.log(`[Webhook] Événement: ${type}`);
 
     if (type === 'user.created' || type === 'user.updated') {
       try {
         const email =
-          
-
-        // eslint-disable-n
-         ext-line @typescript-eslint/no-unsafe-member-access
+          (data.email_addresses?.[0]?.email_address as string) || '';
         const accountType =
           (data.unsafe_metadata?.accountType as string) || 'user';
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const clerkId = data.id as string;
 
         console.log(`[Webhook] Sync ${accountType}: ${email} (${clerkId})`);
 
         if (accountType === 'school') {
-          // Synchronisation d'une École
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const metadata = data.unsafe_metadata || {};
-          await t
-             his.schoolsService.upsertClerkSch
-             ool({
-             
+          await this.schoolsService.upsertClerkSchool({
             clerkId,
             name:
               (metadata.fullName as string) ||
               (data.first_name as string) ||
               email,
             email: email,
-            type: 
-             metadata.schoolType as string,
-             
+            type: metadata.schoolType as string,
             status: metadata.schoolStatus as string,
             city: metadata.city as string,
             latitude: metadata.latitude as number,
@@ -89,16 +124,10 @@ export class AuthController {
           });
           console.log(`[Webhook] École ${email} synchronisée ✅`);
         } else {
-          // Synchronisation d'un Utilisateur standard
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const firstName = (data.first_name as string) || '';
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const lastName = (data.last_name as string) || '';
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const metadata = data.unsafe_metadata || {};
 
-             
-             
           let phoneNumber = data.phone_numbers?.[0]?.phone_number as string;
           if (!phoneNumber) phoneNumber = metadata.phoneNumber as string;
 
@@ -109,7 +138,6 @@ export class AuthController {
               (metadata.fullName as string) ||
               `${firstName} ${lastName}`.trim(),
             phoneNumber: phoneNumber || undefined,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             profilePhoto: data.image_url as string,
           });
           console.log(`[Webhook] Utilisateur ${email} synchronisé ✅`);
@@ -123,13 +151,8 @@ export class AuthController {
     return { received: true };
   }
 
-  /**
-   * Endpoint de secours simplifié pour synchroniser l'utilisateur directement depuis le frontend.
-   * Utile si le webhook Clerk est lent ou mal configuré.
-   */
   @Post('sync')
   async syncUser(@Body() dto: any) {
-    console.log('[AuthSync] Requête de synchronisation reçue:', dto.email);
     try {
       const user = await this.usersService.upsertClerkUser({
         clerkId: dto.clerkId,
@@ -138,7 +161,6 @@ export class AuthController {
         phoneNumber: dto.phoneNumber,
         profilePhoto: dto.profilePhoto,
       });
-      console.log('[AuthSync] Utilisateur synchronisé avec succès ✅');
       return user;
     } catch (error) {
       console.error('[AuthSync] ERREUR lors de la synchronisation:', error);
