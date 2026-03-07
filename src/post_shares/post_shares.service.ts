@@ -14,14 +14,34 @@ export class PostSharesService {
   ) {}
 
   async create(dto: CreatePostShareDto) {
-    const user = await this.usersService.findByIdOrClerkId(dto.userId);
-    if (!user) throw new NotFoundException('User not found');
+    console.log('[PostSharesService] Creating share for:', dto);
+    try {
+      const user = await this.usersService.findByIdOrClerkId(dto.userId);
+      if (!user) {
+        console.error('[PostSharesService] User not found:', dto.userId);
+        throw new NotFoundException('User not found');
+      }
 
-    const share = this.shareRepository.create({
-      user: user,
-      post: { id: dto.postId },
-    } as any);
-    return this.shareRepository.save(share);
+      console.log('[PostSharesService] Found user:', user.id);
+
+      const share = this.shareRepository.create({
+        user: user,
+        post: { id: dto.postId } as any,
+      });
+
+      const savedShare = await this.shareRepository.save(share);
+      console.log(
+        
+       ,
+      
+        '[PostSharesService] Share saved successfully:',
+        savedShare.id,
+      );
+      return savedShare;
+    } catch (error) {
+      console.error('[PostSharesService] Error creating share:', error);
+      throw error;
+    }
   }
 
   findAll() {
