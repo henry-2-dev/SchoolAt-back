@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { PinnedSchoolsService } from './pinned_schools.service';
-import { PinnedSchoolsController } from './pinned_schools.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from 'src/users/users.module';
 import { UserPinnedSchool } from './pinned-schools.entity';
-import { User } from 'src/users/user.entity';
+import { PinnedSchoolsController } from './pinned_schools.controller';
+import { PinnedSchoolsService } from './pinned_schools.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserPinnedSchool, User])],
+  imports: [TypeOrmModule.forFeature([UserPinnedSchool]), UsersModule],
   controllers: [PinnedSchoolsController],
   providers: [PinnedSchoolsService],
 })
