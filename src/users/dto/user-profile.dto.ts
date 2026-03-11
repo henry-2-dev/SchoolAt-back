@@ -11,4 +11,10 @@ export class UserProfileDto {
     comments: number;
     pins: number;
   };
+  pinnedSchools: {
+    id: string;
+    name: string;
+    profilePhoto: string;
+    city: string;
+  }[];
 }
