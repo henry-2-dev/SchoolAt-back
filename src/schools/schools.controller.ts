@@ -1,12 +1,12 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
@@ -32,12 +32,21 @@ export class SchoolsController {
     @Query('lng') lng?: string,
     @Query('radius') radius?: string,
     @Query('q') q?: string,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
   ) {
     const userLat = lat ? parseFloat(lat) : undefined;
     const userLng = lng ? parseFloat(lng) : undefined;
-    const radiusKm = radius ? parseFloat(radius) : 50; // Par défaut: rayon de 50km
+    const radiusKm = radius ? parseFloat(radius) : 50;
 
-    return this.schoolsService.findNearbySchools(userLat, userLng, radiusKm, q);
+    return this.schoolsService.findNearbySchools(
+      userLat,
+      userLng,
+      radiusKm,
+      q,
+      type,
+      status,
+    );
   }
 
   @Get(':id/profile')

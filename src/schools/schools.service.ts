@@ -149,19 +149,42 @@ export class SchoolsService {
     userLng?: number,
     radiusInKm: number = 50,
     searchQuery?: string,
+    type?: string,
+    status?: string,
   ): Promise<SchoolGeoDTO[]> {
     const findOptions: any = {
-      relations: ['comments'], // Nécessaire pour le rating/isTopSchool
+      relations: ['comments'],
+      where: {},
     };
 
     if (searchQuery) {
       const cleanQuery = searchQuery.trim();
-      // Recherche insensible à la casse dans le nom ou la ville
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       findOptions.where = [
         { name: ILike(`%${cleanQuery}%`) },
         { city: ILike(`%${cleanQuery}%`) },
       ];
+    }
+
+    if (type && type !== 'Tous') {
+      if (Array.isArray(findOptions.where)) {
+        findOptions.where = findOptions.where.map((cond) => ({
+          ...cond,
+          type: ILike(`%${type}%`),
+        }));
+      } else {
+        findOptions.where.type = ILike(`%${type}%`);
+      }
+    }
+
+    if (status && status !== 'Tous') {
+      if (Array.isArray(findOptions.where)) {
+        findOptions.where = findOptions.where.map((cond) => ({
+          ...cond,
+          status: status,
+        }));
+      } else {
+        findOptions.where.status = status;
+      }
     }
 
     const schools = await this.schoolRepository.find(findOptions);
