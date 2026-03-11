@@ -35,6 +35,7 @@ export class SchoolsPostsService {
 
       return posts.map((post) => ({
         idPost: post.id,
+        idSchool: post.school?.id ?? null,
         ppschool: post.school?.profilePhoto ?? null,
         nameschool: post.school?.name ?? null,
         levelschool: post.school?.type ?? null,

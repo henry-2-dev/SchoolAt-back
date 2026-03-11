@@ -31,9 +31,6 @@ export class PostSharesService {
 
       const savedShare = await this.shareRepository.save(share);
       console.log(
-        
-       ,
-      
         '[PostSharesService] Share saved successfully:',
         savedShare.id,
       );
