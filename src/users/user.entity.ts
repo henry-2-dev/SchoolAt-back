@@ -32,6 +32,9 @@ export class User {
   @Column({ nullable: true })
   profilePhoto: string;
 
+  @Column({ nullable: true })
+  city: string;
+
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 

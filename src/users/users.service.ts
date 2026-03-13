@@ -52,6 +52,14 @@ export class UsersService {
     return this.findOne(id);
   }
 
+  async updateByClerkId(clerkId: string, dto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { clerkId } });
+    if (!user)
+      throw new NotFoundException('User not found for clerkId: ' + clerkId);
+    await this.userRepository.update(user.id, dto);
+    return this.findOne(user.id);
+  }
+
   async upsertClerkUser(dto: CreateUserDto) {
     console.log('[UsersService] Upsert user for clerkId:', dto.clerkId);
 
@@ -105,7 +113,7 @@ export class UsersService {
       fullName: user.fullName,
       email: user.email,
       profilePhoto: user.profilePhoto ?? '',
-      city: 'Cameroun', // Valeur par défaut ou à extraire si dispo
+      city: user.city || 'Cameroun',
       role: user.role,
       stats: {
         schoolsFollowed: user.pinnedSchools?.length || 0,

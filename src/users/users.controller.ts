@@ -40,6 +40,11 @@ export class UsersController {
     return this.usersService.findProfileUserByClerkOrId(clerkOrId);
   }
 
+  @Patch('profile/:clerkId')
+  updateProfile(@Param('clerkId') clerkId: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateByClerkId(clerkId, dto);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

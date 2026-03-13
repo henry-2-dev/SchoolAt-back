@@ -6,4 +6,6 @@ export class UpdateUserDto {
   email?: string;
   profilePhoto?: string;
   role?: Role;
+  city?: string;
+  phoneNumber?: string;
 }
