@@ -9,4 +9,8 @@ export class UpdateSchoolDto {
   city?: string;
   profilePhoto?: string;
   coverPhoto?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
 }

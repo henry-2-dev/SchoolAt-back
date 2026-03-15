@@ -113,6 +113,7 @@ export class UsersService {
       fullName: user.fullName,
       email: user.email,
       profilePhoto: user.profilePhoto ?? '',
+      phoneNumber: user.phoneNumber ?? '',
       city: user.city || 'Cameroun',
       role: user.role,
       stats: {

@@ -29,6 +29,9 @@ export class SchoolsService {
       where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
       relations: [
         'posts',
+        'posts.media',
+        'posts.comments',
+        'posts.comments.user',
         'photos',
         'comments',
         'pinnedBy',
@@ -59,6 +62,48 @@ export class SchoolsService {
             ppuser: comment.user?.profilePhoto ?? '',
             username: comment.user?.fullName ?? '',
             contain: comment.content ?? '',
+          }))
+        : [],
+      address: school.address,
+      email: school.email,
+      phone: school.phone,
+      website: school.website,
+      status: school.status,
+      type: school.type,
+      curriculum: school.curriculum,
+      affiliation: school.affiliation,
+      boarding: school.boarding,
+      posts: school.posts
+        ? school.posts.map((post) => ({
+            idPost: post.id,
+            ppschool: school.profilePhoto,
+            nameschool: school.name,
+            levelschool: school.type,
+            cituschool: school.city,
+            timeposted: post.createdAt,
+            descriptionpost: post.description,
+            message: post.content,
+            type: post.type,
+            containpost: post.media
+              ? post.media.map((m) => ({
+                  id: m.id,
+                  url: m.url,
+                  type: m.type,
+                }))
+              : [],
+            nbviewpost: post.views,
+            nbcommentpost: post.comments ? post.comments.length : 0,
+            nbsavepost: post.saves ? post.saves.length : 0,
+            nbsharepost: post.shares ? post.shares.length : 0,
+            commentpost: post.comments
+              ? post.comments.map((c) => ({
+                  id: c.id,
+                  message: c.content,
+                  ppuser: c.user?.profilePhoto,
+                  nameuser: c.user?.fullName,
+                  datetimecomment: c.createdAt,
+                }))
+              : [],
           }))
         : [],
     };
@@ -134,6 +179,13 @@ export class SchoolsService {
   async update(id: string, dto: UpdateSchoolDto) {
     await this.schoolRepository.update(id, dto);
     return this.findOne(id);
+  }
+
+  async updateByClerkId(clerkId: string, dto: UpdateSchoolDto) {
+    const school = await this.schoolRepository.findOne({ where: { clerkId } });
+    if (!school) throw new NotFoundException('School not found');
+    await this.schoolRepository.update(school.id, dto);
+    return this.findOne(school.id);
   }
 
   async remove(id: string) {

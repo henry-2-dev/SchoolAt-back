@@ -57,6 +57,15 @@ export class School {
   @Column({ nullable: true })
   coverPhoto: string;
 
+  @Column({ nullable: true })
+  curriculum: string; // Francophone, Anglophone, Bilingue
+
+  @Column({ nullable: true })
+  affiliation: string; // Laïc, Catholique, Protestant, Musulman
+
+  @Column({ default: false })
+  boarding: boolean; // Internat
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -47,6 +47,16 @@ export class PROFILESCHOOL {
     username: string;
     contain: string;
   }>;
+  address?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  status: string;
+  type: string;
+  curriculum?: string;
+  affiliation?: string;
+  boarding?: boolean;
+  posts: POSTDTO[];
 }
 
 export interface SchoolGeoDTO {
