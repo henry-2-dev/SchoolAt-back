@@ -87,7 +87,7 @@ export class SchoolsService {
             containpost: post.media
               ? post.media.map((m) => ({
                   id: m.id,
-                  url: m.url,
+                  url: m.mediaUrl,
                   type: m.type,
                 }))
               : [],

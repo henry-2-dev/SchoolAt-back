@@ -5,6 +5,7 @@ export class UserProfileDto {
   email: string;
   profilePhoto: string;
   city: string;
+  phoneNumber: string;
   role: string;
   stats: {
     schoolsFollowed: number;
