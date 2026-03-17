@@ -35,6 +35,7 @@ export class PROFILESCHOOL {
   nbpostschool: number;
   nbepingle: number;
   nbavis: number;
+  nbviewsschool: number;
   datecreationaccount: Date;
   mediaschool: Array<{
     id: string;

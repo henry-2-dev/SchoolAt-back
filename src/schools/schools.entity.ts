@@ -66,6 +66,9 @@ export class School {
   @Column({ default: false })
   boarding: boolean; // Internat
 
+  @Column({ default: 0 })
+  views: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

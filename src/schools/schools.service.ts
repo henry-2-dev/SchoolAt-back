@@ -32,6 +32,8 @@ export class SchoolsService {
         'posts.media',
         'posts.comments',
         'posts.comments.user',
+        'posts.saves',
+        'posts.shares',
         'photos',
         'comments',
         'pinnedBy',
@@ -40,6 +42,13 @@ export class SchoolsService {
       ],
     });
     if (!school) return null;
+
+    // Incrémenter les vues si le visiteur n'est pas l'école elle-même
+    if (userId && school.clerkId !== userId) {
+      await this.schoolRepository.increment({ id: school.id }, 'views', 1);
+      school.views += 1;
+    }
+
     return {
       idschool: school.id,
       coverimageschool: school.coverPhoto ?? '',
@@ -51,6 +60,7 @@ export class SchoolsService {
       nbpostschool: school.posts ? school.posts.length : 0,
       nbepingle: school.pinnedBy ? school.pinnedBy.length : 0,
       nbavis: school.comments ? school.comments.length : 0,
+      nbviewsschool: school.views || 0,
       datecreationaccount: school.createdAt,
       mediaschool: school.photos
         ? school.photos.map((photo) => ({ id: photo.id, url: photo.photoUrl }))
@@ -203,6 +213,7 @@ export class SchoolsService {
     searchQuery?: string,
     type?: string,
     status?: string,
+    language?: string,
   ): Promise<SchoolGeoDTO[]> {
     const findOptions: any = {
       relations: ['comments'],
@@ -236,6 +247,23 @@ export class SchoolsService {
         }));
       } else {
         findOptions.where.status = status;
+      }
+    }
+
+    if (language && language !== 'Tous') {
+      // Mapping pour correspondre aux valeurs en base (Francophone/Anglophone/Bilingue)
+      let curriculum = language;
+      if (language.includes('Franç')) curriculum = 'Francophone';
+      if (language.includes('Angl')) curriculum = 'Anglophone';
+      if (language.includes('Biling')) curriculum = 'Bilingue';
+
+      if (Array.isArray(findOptions.where)) {
+        findOptions.where = findOptions.where.map((cond) => ({
+          ...cond,
+          curriculum: ILike(`%${curriculum}%`),
+        }));
+      } else {
+        findOptions.where.curriculum = ILike(`%${curriculum}%`);
       }
     }
 

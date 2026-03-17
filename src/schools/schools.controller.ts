@@ -34,6 +34,7 @@ export class SchoolsController {
     @Query('q') q?: string,
     @Query('type') type?: string,
     @Query('status') status?: string,
+    @Query('language') language?: string,
   ) {
     const userLat = lat ? parseFloat(lat) : undefined;
     const userLng = lng ? parseFloat(lng) : undefined;
@@ -46,6 +47,7 @@ export class SchoolsController {
       q,
       type,
       status,
+      language,
     );
   }
 
