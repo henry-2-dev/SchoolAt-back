@@ -147,9 +147,15 @@ export class SchoolsService {
     }
 
     try {
-      const school = await this.schoolRepository.findOne({
+      let school = await this.schoolRepository.findOne({
         where: { clerkId: dto.clerkId },
       });
+
+      if (!school && dto.email) {
+        school = await this.schoolRepository.findOne({
+          where: { email: dto.email },
+        });
+      }
 
       if (school) {
         console.log('[SchoolsService] Found existing school, updating...');

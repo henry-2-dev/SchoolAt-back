@@ -69,9 +69,15 @@ export class UsersService {
     }
 
     try {
-      const user = await this.userRepository.findOne({
+      let user = await this.userRepository.findOne({
         where: { clerkId: dto.clerkId },
       });
+
+      if (!user && dto.email) {
+        user = await this.userRepository.findOne({
+          where: { email: dto.email },
+        });
+      }
 
       if (user) {
         console.log('[UsersService] Found existing user, updating...');
