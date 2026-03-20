@@ -33,14 +33,14 @@ export class UsersService {
 
   async findAll() {
     return await this.userRepository.find({
-      relations: ['posts', 'comments', 'shares', 'pinnedSchools'],
+      relations: ['postComments', 'postShares', 'pinnedSchools'],
     });
   }
 
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['posts', 'comments', 'shares', 'pinnedSchools'],
+      relations: ['postComments', 'postShares', 'pinnedSchools'],
     });
 
     if (!user) throw new NotFoundException('User not found');
