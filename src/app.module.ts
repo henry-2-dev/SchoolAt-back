@@ -15,6 +15,7 @@ import { SchoolsCommentsModule } from './schools_comments/schools_comments.modul
 import { SchoolsPhotosModule } from './schools_photos/schools_photos.module';
 import { SchoolsPostsModule } from './schools_posts/schools_posts.module';
 import { UsersModule } from './users/users.module';
+import { PostReportsModule } from './post_reports/post_reports.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UsersModule } from './users/users.module';
     PostSavesModule,
     CloudinaryModule,
     AuthModule,
+    PostReportsModule,
   ],
   controllers: [],
   providers: [],
