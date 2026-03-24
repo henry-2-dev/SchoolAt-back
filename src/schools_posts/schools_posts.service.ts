@@ -29,6 +29,8 @@ export class SchoolsPostsService {
         .orderBy('post.createdAt', 'DESC')
         .addOrderBy('comments.createdAt', 'ASC')
         .getMany();
+      // Utiliser l'userId fourni ou un placeholder si absent
+      const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
 
       return posts.map((post) => ({
         idPost: post.id,
