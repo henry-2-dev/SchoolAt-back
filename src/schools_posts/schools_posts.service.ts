@@ -17,18 +17,20 @@ export class SchoolsPostsService {
 
   async findAllFormatted(userId?: string): Promise<POSTDTO[]> {
     try {
-      const posts = await this.postRepository
-        .createQueryBuilder('post')
-        .leftJoinAndSelect('post.school', 'school')
-        .leftJoinAndSelect('post.media', 'media')
-        .leftJoinAndSelect('post.comments', 'comments')
-        .leftJoinAndSelect('comments.user', 'user')
-        .leftJoinAndSelect('post.shares', 'shares')
-        .leftJoinAndSelect('post.saves', 'saves')
-        .leftJoinAndSelect('saves.user', 'save_user')
-        .orderBy('post.createdAt', 'DESC')
-        .addOrderBy('comments.createdAt', 'ASC')
-        .getMany();
+      const posts = await this.postRepository.find({
+        relations: [
+          'school',
+          'media',
+          'comments',
+          'comments.user',
+          'saves',
+          'saves.user',
+          'shares',
+        ],
+        order: {
+          createdAt: 'DESC',
+        },
+      });
       // Utiliser l'userId fourni ou un placeholder si absent
       const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
 
@@ -65,13 +67,17 @@ export class SchoolsPostsService {
           : false,
 
         commentpost: post.comments
-          ? post.comments.map((comment) => ({
-              id: comment.id,
-              message: comment.content ?? (comment as any).text ?? null,
-              ppuser: comment.user?.profilePhoto ?? null,
-              nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
-              datetimecomment: comment.createdAt || (comment as any).date,
-            }))
+          ? post.comments.map((comment) => {
+              // DEBUG: On essaie de voir ce qu'il y a vraiment dans l'objet
+              const rawKeys = Object.keys(comment).join(',');
+              return {
+                id: comment.id,
+                message: comment.content || (comment as any).text || (comment as any).message || `(No content, keys: ${rawKeys})`,
+                ppuser: comment.user?.profilePhoto ?? null,
+                nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
+                datetimecomment: comment.createdAt || (comment as any).date,
+              };
+            })
           : [],
       }));
     } catch (e) {
