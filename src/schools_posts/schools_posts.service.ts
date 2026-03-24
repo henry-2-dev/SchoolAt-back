@@ -30,12 +30,9 @@ export class SchoolsPostsService {
         .addOrderBy('comments.createdAt', 'ASC')
         .getMany();
 
-      // Utiliser l'userId fourni ou un placeholder si absent
-      const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
-
       return posts.map((post) => ({
         idPost: post.id,
-        idSchool: post.school?.id ?? null,
+        idSchool: post.school?.id ?? post.schoolId ?? null,
         ppschool: post.school?.profilePhoto ?? null,
         nameschool: post.school?.name ?? null,
         levelschool: post.school?.type ?? null,
@@ -45,10 +42,10 @@ export class SchoolsPostsService {
         message: post.content ?? null,
         type: post.type,
         containpost: post.media
-          ? post.media.map((media) => ({
-              id: media.id,
-              url: media.mediaUrl ?? null,
-              type: media.type ?? null,
+          ? post.media.map((m) => ({
+              id: m.id,
+              url: m.mediaUrl ?? null,
+              type: m.type ?? null,
             }))
           : [],
 
@@ -68,10 +65,10 @@ export class SchoolsPostsService {
         commentpost: post.comments
           ? post.comments.map((comment) => ({
               id: comment.id,
-              message: comment.content ?? null,
+              message: comment.content ?? (comment as any).text ?? null,
               ppuser: comment.user?.profilePhoto ?? null,
-              nameuser: comment.user?.fullName ?? null,
-              datetimecomment: comment.createdAt,
+              nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
+              datetimecomment: comment.createdAt || (comment as any).date,
             }))
           : [],
       }));

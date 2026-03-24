@@ -1,9 +1,9 @@
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
 import { SchoolComment } from '../schools_comments/schools-comments.entity';

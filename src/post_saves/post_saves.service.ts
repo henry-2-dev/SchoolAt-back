@@ -72,19 +72,20 @@ export class PostSavesService {
       // ... mapping logic remains the same ...
       return {
         idPost: post.id,
-        ppschool: post.school?.profilePhoto,
-        nameschool: post.school?.name,
-        levelschool: post.school?.type,
-        cituschool: post.school?.city,
+        idSchool: post.school?.id ?? (post as any).schoolId ?? null,
+        ppschool: post.school?.profilePhoto ?? null,
+        nameschool: post.school?.name ?? null,
+        levelschool: post.school?.type ?? null,
+        cituschool: post.school?.city ?? null,
         timeposted: post.createdAt,
-        descriptionpost: post.description,
-        message: post.content,
+        descriptionpost: post.description ?? null,
+        message: post.content ?? null,
         type: post.type,
         containpost: post.media
           ? post.media.map((m) => ({
               id: m.id,
-              url: m.mediaUrl,
-              type: m.type,
+              url: m.mediaUrl ?? null,
+              type: m.type ?? null,
             }))
           : [],
         nbviewpost:
@@ -99,10 +100,10 @@ export class PostSavesService {
         commentpost: post.comments
           ? post.comments.map((comment) => ({
               id: comment.id,
-              message: comment.content,
-              ppuser: comment.user?.profilePhoto,
-              nameuser: comment.user?.fullName,
-              datetimecomment: comment.createdAt,
+              message: comment.content ?? (comment as any).text ?? null,
+              ppuser: comment.user?.profilePhoto ?? null,
+              nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
+              datetimecomment: comment.createdAt || (comment as any).date,
             }))
           : [],
       };
