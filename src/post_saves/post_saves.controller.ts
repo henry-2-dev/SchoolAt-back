@@ -16,8 +16,8 @@ export class PostSavesController {
     return { saved };
   }
 
-  @Post('user')
-  async getUserSaves(@Body() body: { userId: string }) {
-    return this.postSavesService.getUserSaves(body.userId);
+  @Get('user/:userId')
+  async getUserSaves(@Param('userId') userId: string) {
+    return this.postSavesService.getUserSaves(userId);
   }
 }

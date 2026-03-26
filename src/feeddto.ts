@@ -24,6 +24,8 @@ export class POSTDTO {
     nameuser?: string | null;
     datetimecomment?: Date;
   }>;
+  idSchool?: string | null;
+  isSavedByUser?: boolean;
 }
 
 export class PROFILESCHOOL {

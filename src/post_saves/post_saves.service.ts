@@ -74,38 +74,34 @@ export class PostSavesService {
         idPost: post.id,
         idSchool: post.school?.id ?? (post as any).schoolId ?? null,
         ppschool: post.school?.profilePhoto ?? null,
-        nameschool: post.school?.name ?? null,
-        levelschool: post.school?.type ?? null,
-        cituschool: post.school?.city ?? null,
+        nameschool: post.school?.name || "École",
+        levelschool: post.school?.type || "Scolaire",
+        cituschool: post.school?.city || "Cameroun",
         timeposted: post.createdAt,
         descriptionpost: post.description ?? null,
         message: post.content ?? null,
         type: post.type,
-        containpost: post.media
-          ? post.media.map((m) => ({
-              id: m.id,
-              url: m.mediaUrl ?? null,
-              type: m.type ?? null,
-            }))
-          : [],
+        containpost: (post.media || []).map((m: any) => ({
+          id: m.id,
+          url: m.mediaUrl ?? null,
+          type: m.type ?? null,
+        })),
         nbviewpost:
           (post.views ?? 0) +
-          (post.comments ? post.comments.length : 0) +
-          (post.saves ? post.saves.length : 0) +
-          (post.shares ? post.shares.length : 0),
-        nbcommentpost: post.comments ? post.comments.length : 0,
-        nbsavepost: post.saves ? post.saves.length : 0,
-        nbsharepost: post.shares ? post.shares.length : 0,
+          (post.comments?.length || 0) +
+          (post.saves?.length || 0) +
+          (post.shares?.length || 0),
+        nbcommentpost: post.comments?.length || 0,
+        nbsavepost: post.saves?.length || 0,
+        nbsharepost: post.shares?.length || 0,
         isSavedByUser: true,
-        commentpost: post.comments
-          ? post.comments.map((comment) => ({
-              id: comment.id,
-              message: comment.content ?? (comment as any).text ?? (comment as any).message ?? "",
-              ppuser: comment.user?.profilePhoto ?? null,
-              nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
-              datetimecomment: comment.createdAt || (comment as any).date,
-            }))
-          : [],
+        commentpost: (post.comments || []).map((comment: any) => ({
+          id: comment.id || Math.random().toString(),
+          message: comment.content || comment.message || comment.text || "Message vide",
+          ppuser: comment.user?.profilePhoto || null,
+          nameuser: comment.user?.fullName || comment.user?.name || "Utilisateur",
+          datetimecomment: comment.createdAt || comment.date || new Date().toISOString(),
+        })),
       };
     });
   }
