@@ -100,7 +100,7 @@ export class PostSavesService {
         commentpost: post.comments
           ? post.comments.map((comment) => ({
               id: comment.id,
-              message: comment.content ?? (comment as any).text ?? null,
+              message: comment.content ?? (comment as any).text ?? (comment as any).message ?? "",
               ppuser: comment.user?.profilePhoto ?? null,
               nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
               datetimecomment: comment.createdAt || (comment as any).date,

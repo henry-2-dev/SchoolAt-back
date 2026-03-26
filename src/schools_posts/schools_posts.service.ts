@@ -38,9 +38,9 @@ export class SchoolsPostsService {
         idPost: post.id,
         idSchool: post.school?.id ?? post.schoolId ?? null,
         ppschool: post.school?.profilePhoto ?? null,
-        nameschool: post.school?.name ?? null,
-        levelschool: post.school?.type ?? null,
-        cituschool: post.school?.city ?? null,
+        nameschool: post.school?.name || "École",
+        levelschool: post.school?.type || "Scolaire",
+        cituschool: post.school?.city || "Cameroun",
         timeposted: post.createdAt,
         descriptionpost: post.description ?? null,
         message: post.content ?? null,
@@ -67,17 +67,13 @@ export class SchoolsPostsService {
           : false,
 
         commentpost: post.comments
-          ? post.comments.map((comment) => {
-              // DEBUG: On essaie de voir ce qu'il y a vraiment dans l'objet
-              const rawKeys = Object.keys(comment).join(',');
-              return {
-                id: comment.id,
-                message: comment.content || (comment as any).text || (comment as any).message || `(No content, keys: ${rawKeys})`,
-                ppuser: comment.user?.profilePhoto ?? null,
-                nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
-                datetimecomment: comment.createdAt || (comment as any).date,
-              };
-            })
+          ? post.comments.map((comment) => ({
+              id: comment.id,
+              message: comment.content ?? (comment as any).text ?? (comment as any).message ?? "",
+              ppuser: comment.user?.profilePhoto ?? null,
+              nameuser: comment.user?.fullName ?? (comment.user as any)?.name ?? "Utilisateur",
+              datetimecomment: comment.createdAt || (comment as any).date,
+            }))
           : [],
       }));
     } catch (e) {
