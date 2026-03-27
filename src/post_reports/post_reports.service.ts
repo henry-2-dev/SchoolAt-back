@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { PostReport } from './post-reports.entity';
 import { CreatePostReportDto } from './create-post-report.dto';
 import { SchoolPost } from '../schools_posts/schools-posts.entity';
-import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PostReportsService {
@@ -13,8 +13,7 @@ export class PostReportsService {
     private readonly postReportsRepository: Repository<PostReport>,
     @InjectRepository(SchoolPost)
     private readonly schoolPostsRepository: Repository<SchoolPost>,
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(createPostReportDto: CreatePostReportDto): Promise<PostReport> {
@@ -23,7 +22,7 @@ export class PostReportsService {
     const post = await this.schoolPostsRepository.findOne({ where: { id: postId } });
     if (!post) throw new NotFoundException('Post not found');
 
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    const user = await this.usersService.findByIdOrClerkId(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const report = this.postReportsRepository.create({
