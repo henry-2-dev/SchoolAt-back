@@ -221,59 +221,34 @@ export class SchoolsService {
     status?: string,
     language?: string,
   ): Promise<SchoolGeoDTO[]> {
-    const findOptions: any = {
-      relations: ['comments'],
-      where: {},
-    };
+    const queryBuilder = this.schoolRepository.createQueryBuilder('school');
+    queryBuilder.leftJoinAndSelect('school.comments', 'comments');
 
-    if (searchQuery) {
+    // Conditions de filtrage de base
+    if (searchQuery && searchQuery.trim() !== '') {
       const cleanQuery = searchQuery.trim();
-      findOptions.where = [
-        { name: ILike(`%${cleanQuery}%`) },
-        { city: ILike(`%${cleanQuery}%`) },
-      ];
+      queryBuilder.andWhere(
+        '(school.name ILIKE :q OR school.city ILIKE :q)',
+        { q: `%${cleanQuery}%` },
+      );
     }
 
-    if (type && type !== 'Tous') {
-      if (Array.isArray(findOptions.where)) {
-        findOptions.where = findOptions.where.map((cond) => ({
-          ...cond,
-          type: ILike(`%${type}%`),
-        }));
-      } else {
-        findOptions.where.type = ILike(`%${type}%`);
-      }
+    if (type && type !== 'all') {
+      queryBuilder.andWhere('school.type ILIKE :type', { type: `%${type}%` });
     }
 
-    if (status && status !== 'Tous') {
-      if (Array.isArray(findOptions.where)) {
-        findOptions.where = findOptions.where.map((cond) => ({
-          ...cond,
-          status: status,
-        }));
-      } else {
-        findOptions.where.status = status;
-      }
+    if (status && status !== 'all') {
+      queryBuilder.andWhere('school.status = :status', { status });
     }
 
-    if (language && language !== 'Tous') {
-      // Mapping pour correspondre aux valeurs en base (Francophone/Anglophone/Bilingue)
-      let curriculum = language;
-      if (language.includes('Franç')) curriculum = 'Francophone';
-      if (language.includes('Angl')) curriculum = 'Anglophone';
-      if (language.includes('Biling')) curriculum = 'Bilingue';
-
-      if (Array.isArray(findOptions.where)) {
-        findOptions.where = findOptions.where.map((cond) => ({
-          ...cond,
-          curriculum: ILike(`%${curriculum}%`),
-        }));
-      } else {
-        findOptions.where.curriculum = ILike(`%${curriculum}%`);
-      }
+    if (language && language !== 'all') {
+      // Le frontend envoie déjà "Francophone", "Anglophone" ou "Bilingue"
+      queryBuilder.andWhere('school.curriculum ILIKE :curriculum', { 
+        curriculum: `%${language}%` 
+      });
     }
 
-    const schools = await this.schoolRepository.find(findOptions);
+    const schools = await queryBuilder.getMany();
 
     const calculateDistance = (
       lat1: number,
