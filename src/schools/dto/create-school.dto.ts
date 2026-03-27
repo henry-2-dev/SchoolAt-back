@@ -14,4 +14,5 @@ export class CreateSchoolDto {
   website?: string;
   profilePhoto?: string;
   coverPhoto?: string;
+  curriculum?: string;
 }
