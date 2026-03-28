@@ -81,7 +81,21 @@ export class UsersService {
 
       if (user) {
         console.log('[UsersService] Found existing user, updating...');
-        return await this.userRepository.save({ ...user, ...dto });
+
+        // Preserve the custom profile photo: only update profilePhoto from Clerk
+        // if the user has not set a custom one (i.e., it's still the Clerk default or null).
+        // A custom photo is one that does NOT start with "https://img.clerk.com"
+        const hasCustomPhoto =
+          user.profilePhoto &&
+          !user.profilePhoto.startsWith('https://img.clerk.com');
+
+        const mergedData = {
+          ...user,
+          ...dto,
+          profilePhoto: hasCustomPhoto ? user.profilePhoto : dto.profilePhoto,
+        };
+
+        return await this.userRepository.save(mergedData);
       }
 
       console.log('[UsersService] Creating new user record...');

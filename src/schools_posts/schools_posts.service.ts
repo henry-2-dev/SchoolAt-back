@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { POSTDTO } from '../feeddto';
 import { SchoolsService } from '../schools/schools.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { UserPinnedSchool } from '../pinned_schools/pinned-schools.entity';
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
 import { SchoolPost } from './schools-posts.entity';
@@ -12,7 +14,10 @@ export class SchoolsPostsService {
   constructor(
     @InjectRepository(SchoolPost)
     private readonly postRepository: Repository<SchoolPost>,
+    @InjectRepository(UserPinnedSchool)
+    private readonly pinnedRepository: Repository<UserPinnedSchool>,
     private readonly schoolsService: SchoolsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async findAllFormatted(userId?: string): Promise<POSTDTO[]> {
@@ -45,8 +50,36 @@ export class SchoolsPostsService {
       school: school,
       media: dto.media ? dto.media : [],
     } as any);
-    return this.postRepository.save(post);
+    
+    const savedPost = await this.postRepository.save(post);
+
+    // Notify all followers (users who pinned this school)
+    try {
+      const followers = await this.pinnedRepository.find({
+        where: { school: { id: school.id } },
+        relations: ['user'],
+      });
+
+      const userIds = followers.map((f) => f.user.id);
+      
+      // Send notifications in parallel (NotificationsService will handle each asynchronously)
+      userIds.forEach((userId) => {
+        this.notificationsService.notifyUser(
+          userId,
+          `Nouvelle publication de ${school.name}`,
+          'Découvrez les dernières actualités !',
+          { type: 'post', postId: savedPost.id, schoolId: school.id }
+        ).catch(err => {
+          console.warn(`[Notifications] Failed to notify user ${userId}:`, err?.message);
+        });
+      });
+    } catch (e) {
+      console.warn('[Notifications] Could not notify followers on new post:', e?.message);
+    }
+
+    return savedPost;
   }
+
 
   findAll() {
     return this.postRepository.find({

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UserPinnedSchool } from './pinned-schools.entity';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class PinnedSchoolsService {
     @InjectRepository(UserPinnedSchool)
     private readonly pinnedRepository: Repository<UserPinnedSchool>,
     private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async togglePin(userId: string, schoolId: string) {
@@ -32,6 +34,19 @@ export class PinnedSchoolsService {
         school: { id: schoolId } as any,
       });
       await this.pinnedRepository.save(newPin);
+
+      // Notify the school that someone pinned them
+      try {
+        await this.notificationsService.notifyUser(
+          schoolId,
+          '📌 Nouveau follower !',
+          `${user.fullName || 'Un utilisateur'} a épinglé votre établissement.`,
+          { type: 'pin', userId: user.id },
+        );
+      } catch (e) {
+        console.warn('[Notifications] Could not notify school on pin:', e?.message);
+      }
+
       return { pinned: true };
     }
   }
