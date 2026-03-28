@@ -49,7 +49,7 @@ export class SchoolsPostsService {
       description: dto.description,
       school: school,
       media: dto.media ? dto.media : [],
-    } as any);
+    } as any) as SchoolPost;
     
     const savedPost = await this.postRepository.save(post);
 
