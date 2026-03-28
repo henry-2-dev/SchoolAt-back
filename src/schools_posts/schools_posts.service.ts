@@ -43,15 +43,16 @@ export class SchoolsPostsService {
       throw new NotFoundException(`School with ID ${dto.schoolId} not found`);
     }
 
-    const post = this.postRepository.create({
+    const postData: any = {
       type: dto.type,
       content: dto.content,
       description: dto.description,
       school: school,
       media: dto.media ? dto.media : [],
-    } as any) as SchoolPost;
+    };
     
-    const savedPost = await this.postRepository.save(post);
+    const post = this.postRepository.create(postData);
+    const savedPost: any = await this.postRepository.save(post);
 
     // Notify all followers (users who pinned this school)
     try {
