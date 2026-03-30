@@ -11,6 +11,8 @@ export class UserProfileDto {
     schoolsFollowed: number;
     comments: number;
     pins: number;
+    savedPosts: number;
+    shares: number;
   };
   pinnedSchools: {
     id: string;
