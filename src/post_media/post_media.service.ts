@@ -13,7 +13,10 @@ export class PostMediaService {
   ) {}
 
   create(dto: CreatePostMediaDto) {
-    const media = this.mediaRepository.create(dto);
+    const media = this.mediaRepository.create({
+      ...dto,
+      post: { id: dto.postId } as any,
+    });
     return this.mediaRepository.save(media);
   }
 
