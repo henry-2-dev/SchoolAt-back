@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SchoolsPhotos } from './schools-photos.entity';
+import { School } from '../schools/schools.entity';
 import { CreateSchoolPhotoDto } from './dto/create-school-photo.dto';
 import { UpdateSchoolPhotoDto } from './dto/update-school-photo.dto';
 
@@ -10,14 +11,28 @@ export class SchoolsPhotosService {
   constructor(
     @InjectRepository(SchoolsPhotos)
     private readonly photoRepository: Repository<SchoolsPhotos>,
+    @InjectRepository(School)
+    private readonly schoolRepository: Repository<School>,
   ) {}
 
   /** Ajouter une photo à une école */
-  create(dto: CreateSchoolPhotoDto) {
+  async create(dto: CreateSchoolPhotoDto) {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        dto.schoolId,
+      );
+
+    const school = await this.schoolRepository.findOne({
+      where: isUuid ? { id: dto.schoolId } : { clerkId: dto.schoolId },
+    });
+
+    if (!school) {
+      throw new NotFoundException(`School with ID ${dto.schoolId} not found`);
+    }
+
     const photo = this.photoRepository.create({
       photoUrl: dto.photoUrl,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      school: { id: dto.schoolId } as any,
+      school: school,
     });
     return this.photoRepository.save(photo);
   }
