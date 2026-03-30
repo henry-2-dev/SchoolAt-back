@@ -59,6 +59,9 @@ export class PROFILESCHOOL {
   curriculum?: string;
   affiliation?: string;
   boarding?: boolean;
+  city?: string;
+  latitude?: number | string;
+  longitude?: number | string;
   posts: POSTDTO[];
 }
 

@@ -83,6 +83,9 @@ export class SchoolsService {
       curriculum: school.curriculum,
       affiliation: school.affiliation,
       boarding: school.boarding,
+      city: school.city,
+      latitude: school.latitude,
+      longitude: school.longitude,
       posts: school.posts
         ? school.posts.map((post) => ({
             idPost: post.id,

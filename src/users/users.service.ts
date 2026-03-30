@@ -122,7 +122,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: isUuid ? { id: idOrClerkId } : { clerkId: idOrClerkId },
-      relations: ['pinnedSchools', 'pinnedSchools.school', 'schoolComments'],
+      relations: ['pinnedSchools', 'pinnedSchools.school', 'schoolComments', 'postSaves', 'postShares'],
     });
 
     if (!user) return null;
@@ -140,6 +140,8 @@ export class UsersService {
         schoolsFollowed: user.pinnedSchools?.length || 0,
         comments: user.schoolComments?.length || 0,
         pins: user.pinnedSchools?.length || 0, // Idem que followed pour l'instant
+        savedPosts: user.postSaves?.length || 0,
+        shares: user.postShares?.length || 0,
       },
       pinnedSchools:
         user.pinnedSchools?.map((pin) => ({

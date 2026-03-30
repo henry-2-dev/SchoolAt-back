@@ -106,6 +106,7 @@ export class AuthController {
 
         if (accountType === 'school') {
           const metadata = data.unsafe_metadata || {};
+          // Upsert in schools table
           await this.schoolsService.upsertClerkSchool({
             clerkId,
             name:
@@ -122,7 +123,20 @@ export class AuthController {
               (metadata.phoneNumber as string) ||
               (data.phone_numbers?.[0]?.phone_number as string),
           });
-          console.log(`[Webhook] École ${email} synchronisée ✅`);
+
+          // ALSO sync as a "Shadow User" to enable social features (saves, shares, etc.)
+          await this.usersService.upsertClerkUser({
+            clerkId,
+            email: email,
+            fullName:
+              (metadata.fullName as string) ||
+              (data.first_name as string) ||
+              email,
+            phoneNumber: (metadata.phoneNumber as string) || (data.phone_numbers?.[0]?.phone_number as string),
+            profilePhoto: data.image_url as string,
+          });
+
+          console.log(`[Webhook] École ${email} synchronisée (School + User) ✅`);
         } else {
           const firstName = (data.first_name as string) || '';
           const lastName = (data.last_name as string) || '';
