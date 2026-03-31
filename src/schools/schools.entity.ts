@@ -61,6 +61,9 @@ export class School {
   curriculum: string; // Francophone, Anglophone, Bilingue
 
   @Column({ nullable: true })
+  immatriculation: string; // N° d'immatriculation officiel
+
+  @Column({ nullable: true })
   affiliation: string; // Laïc, Catholique, Protestant, Musulman
 
   @Column({ default: false })
@@ -68,6 +71,12 @@ export class School {
 
   @Column({ default: 0 })
   views: number;
+
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ nullable: true })
+  documentVerification: string;
 
   @CreateDateColumn()
   createdAt: Date;

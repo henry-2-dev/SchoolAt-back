@@ -39,6 +39,7 @@ export class PROFILESCHOOL {
   nbavis: number;
   nbviewsschool: number;
   datecreationaccount: Date;
+  isVerified: boolean;
   mediaschool: Array<{
     id: string;
     url: string;
@@ -57,6 +58,7 @@ export class PROFILESCHOOL {
   status: string;
   type: string;
   curriculum?: string;
+  immatriculation?: string;
   affiliation?: string;
   boarding?: boolean;
   city?: string;
@@ -81,6 +83,7 @@ export interface SchoolGeoDTO {
   rating: number; // ex: 4.5
   distance?: number; // Calculé par le backend idéalement (en km)
   isTopSchool: boolean; // Badge "Top école"
+  isVerified: boolean; // Badge jaune de certification
 
   // Médias
   coverImageUrl: string; // Pour le background de la carte (ground.jpg actuel)

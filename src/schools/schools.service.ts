@@ -62,6 +62,7 @@ export class SchoolsService {
       nbavis: school.comments ? school.comments.length : 0,
       nbviewsschool: school.views || 0,
       datecreationaccount: school.createdAt,
+      isVerified: school.isVerified || false,
       mediaschool: school.photos
         ? school.photos.map((photo) => ({ id: photo.id, url: photo.photoUrl }))
         : [],
@@ -81,6 +82,7 @@ export class SchoolsService {
       status: school.status,
       type: school.type,
       curriculum: school.curriculum,
+      immatriculation: school.immatriculation ?? '',
       affiliation: school.affiliation,
       boarding: school.boarding,
       city: school.city,
@@ -306,6 +308,7 @@ export class SchoolsService {
         distance:
           distance !== undefined ? parseFloat(distance.toFixed(2)) : undefined,
         isTopSchool,
+        isVerified: school.isVerified || false,
         coverImageUrl: school.coverPhoto ?? '',
       };
 

@@ -14,4 +14,7 @@ export class UpdateSchoolDto {
   email?: string;
   phone?: string;
   website?: string;
+  isVerified?: boolean;
+  documentVerification?: string;
+  immatriculation?: string;
 }
