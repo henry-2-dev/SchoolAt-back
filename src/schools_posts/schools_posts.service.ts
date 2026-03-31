@@ -96,6 +96,7 @@ export class SchoolsPostsService {
       nameschool: post.school?.name || "École",
       levelschool: post.school?.type || "Scolaire",
       cituschool: post.school?.city || "Cameroun",
+      isVerified: post.school?.isVerified ?? false,
       timeposted: post.createdAt,
       descriptionpost: post.description ?? null,
       message: post.content ?? null,

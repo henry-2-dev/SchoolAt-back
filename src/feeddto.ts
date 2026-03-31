@@ -25,6 +25,7 @@ export class POSTDTO {
     datetimecomment?: Date;
   }>;
   idSchool?: string | null;
+  isVerified?: boolean;
   isSavedByUser?: boolean;
 }
 

@@ -95,6 +95,7 @@ export class SchoolsService {
             nameschool: school.name,
             levelschool: school.type,
             cituschool: school.city,
+            isVerified: school.isVerified ?? false,
             timeposted: post.createdAt,
             descriptionpost: post.description,
             message: post.content,
