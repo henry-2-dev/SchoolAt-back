@@ -18,7 +18,7 @@ export class PinnedSchoolsService {
 
   async togglePin(userId: string, schoolId: string) {
     let pinnerUser = await this.usersService.findByIdOrClerkId(userId);
-    let pinnerSchool = null;
+    let pinnerSchool: any = null;
 
     if (!pinnerUser) {
       pinnerSchool = await this.schoolsService.findByIdOrClerkId(userId);
@@ -38,19 +38,22 @@ export class PinnedSchoolsService {
       return { pinned: false };
     } else {
       const newPin = this.pinnedRepository.create({
-        user: pinnerUser,
-        pinnerSchool: pinnerSchool,
+        user: pinnerUser as any,
+        pinnerSchool: pinnerSchool as any,
         school: { id: schoolId } as any,
       });
       await this.pinnedRepository.save(newPin);
 
       // Notify the school that someone pinned them
       try {
+        const pinnerName = pinnerUser ? pinnerUser.fullName : (pinnerSchool ? pinnerSchool.name : 'Quelqu\'un');
+        const pinnerId = pinnerUser ? pinnerUser.id : (pinnerSchool ? pinnerSchool.id : userId);
+        
         await this.notificationsService.notifyUser(
           schoolId,
           '📌 Nouveau follower !',
-          `${user.fullName || 'Un utilisateur'} a épinglé votre établissement.`,
-          { type: 'pin', userId: user.id },
+          `${pinnerName} a épinglé votre établissement.`,
+          { type: 'pin', userId: pinnerId },
         );
       } catch (e) {
         console.warn('[Notifications] Could not notify school on pin:', e?.message);
@@ -62,7 +65,7 @@ export class PinnedSchoolsService {
 
   async getUserPinnedSchools(userId: string) {
     let pinnerUser = await this.usersService.findByIdOrClerkId(userId);
-    let pinnerSchool = null;
+    let pinnerSchool: any = null;
 
     if (!pinnerUser) {
       pinnerSchool = await this.schoolsService.findByIdOrClerkId(userId);
