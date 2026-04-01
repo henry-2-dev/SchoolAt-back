@@ -31,6 +31,7 @@ export class POSTDTO {
 
 export class PROFILESCHOOL {
   idschool: string;
+  clerkid?: string;
   coverimageschool: string;
   ppschool: string;
   nameschool: string;
