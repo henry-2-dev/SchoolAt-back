@@ -35,9 +35,9 @@ export class SchoolsService {
         'posts.saves',
         'posts.shares',
         'photos',
-        'comments',
         'pinnedBy',
         'pinnedBy.user',
+        'pinnedBy.pinnerSchool',
         'comments.user',
       ],
     });
@@ -51,11 +51,15 @@ export class SchoolsService {
 
     return {
       idschool: school.id,
+      clerkid: school.clerkId,
       coverimageschool: school.coverPhoto ?? '',
       ppschool: school.profilePhoto ?? '',
       nameschool: school.name,
       isuserpinned: userId
-        ? !!school.pinnedBy?.find((pin) => pin.user?.id === userId)
+        ? !!school.pinnedBy?.find((pin) => 
+            pin.user?.id === userId || pin.user?.clerkId === userId ||
+            pin.pinnerSchool?.id === userId || pin.pinnerSchool?.clerkId === userId
+          )
         : false,
       nbpostschool: school.posts ? school.posts.length : 0,
       nbepingle: school.pinnedBy ? school.pinnedBy.length : 0,
