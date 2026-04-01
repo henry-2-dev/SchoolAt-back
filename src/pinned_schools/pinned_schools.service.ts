@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
+import { SchoolsService } from '../schools/schools.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { UserPinnedSchool } from './pinned-schools.entity';
 
@@ -11,18 +12,25 @@ export class PinnedSchoolsService {
     @InjectRepository(UserPinnedSchool)
     private readonly pinnedRepository: Repository<UserPinnedSchool>,
     private readonly usersService: UsersService,
+    private readonly schoolsService: SchoolsService,
     private readonly notificationsService: NotificationsService,
   ) {}
 
   async togglePin(userId: string, schoolId: string) {
-    const user = await this.usersService.findByIdOrClerkId(userId);
-    if (!user) throw new NotFoundException('User not found');
+    let pinnerUser = await this.usersService.findByIdOrClerkId(userId);
+    let pinnerSchool = null;
+
+    if (!pinnerUser) {
+      pinnerSchool = await this.schoolsService.findByIdOrClerkId(userId);
+      if (!pinnerSchool) throw new NotFoundException('User or School not found');
+    }
+
+    const whereClause = pinnerUser
+      ? { user: { id: pinnerUser.id }, school: { id: schoolId } }
+      : { pinnerSchool: { id: pinnerSchool.id }, school: { id: schoolId } };
 
     const existingPin = await this.pinnedRepository.findOne({
-      where: {
-        user: { id: user.id },
-        school: { id: schoolId },
-      },
+      where: whereClause as any,
     });
 
     if (existingPin) {
@@ -30,7 +38,8 @@ export class PinnedSchoolsService {
       return { pinned: false };
     } else {
       const newPin = this.pinnedRepository.create({
-        user: user,
+        user: pinnerUser,
+        pinnerSchool: pinnerSchool,
         school: { id: schoolId } as any,
       });
       await this.pinnedRepository.save(newPin);
@@ -52,11 +61,20 @@ export class PinnedSchoolsService {
   }
 
   async getUserPinnedSchools(userId: string) {
-    const user = await this.usersService.findByIdOrClerkId(userId);
-    if (!user) throw new NotFoundException('User not found');
+    let pinnerUser = await this.usersService.findByIdOrClerkId(userId);
+    let pinnerSchool = null;
+
+    if (!pinnerUser) {
+      pinnerSchool = await this.schoolsService.findByIdOrClerkId(userId);
+      if (!pinnerSchool) throw new NotFoundException('User or School not found');
+    }
+
+    const whereClause = pinnerUser
+      ? { user: { id: pinnerUser.id } }
+      : { pinnerSchool: { id: pinnerSchool.id } };
 
     const pins = await this.pinnedRepository.find({
-      where: { user: { id: user.id } },
+      where: whereClause as any,
       relations: ['school', 'school.photos', 'school.comments'],
     });
 

@@ -22,8 +22,11 @@ export class SchoolsPostsController {
   }
 
   @Get('formatted')
-  findAllFormatted(@Query('userId') userId?: string) {
-    return this.postsService.findAllFormatted(userId);
+  findAllFormatted(
+    @Query('userId') userId?: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.postsService.findAllFormatted(userId, limit ? Number(limit) : 100);
   }
 
   @Get()

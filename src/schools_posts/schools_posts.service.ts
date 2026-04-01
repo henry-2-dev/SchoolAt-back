@@ -20,15 +20,95 @@ export class SchoolsPostsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async findAllFormatted(userId?: string): Promise<POSTDTO[]> {
+  // Fonction utilitaire pour mélanger un tableau (Fisher-Yates)
+  private shuffleArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  async findAllFormatted(userId?: string, limit: number = 100): Promise<POSTDTO[]> {
     try {
-      const posts = await this.postRepository.find({
+      const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
+
+      // 1. Récupérer les écoles épinglées par l'utilisateur (ou l'école)
+      const user = await this.schoolsService.findByIdOrClerkId(targetUserId); // Optionnel, vu qu'on l'a peut-être pas
+      let pinnedSchoolIds: string[] = [];
+      try {
+        const pinnedSchools = await this.pinnedRepository.find({
+          where: [
+            { user: { clerkId: targetUserId } },
+            { user: { id: targetUserId } },
+            { pinnerSchool: { clerkId: targetUserId } },
+            { pinnerSchool: { id: targetUserId } }
+          ],
+          relations: ['school'],
+        });
+        pinnedSchoolIds = pinnedSchools.map(p => p.school.id);
+      } catch (e) {
+        console.warn('Erreur récupération épingles:', e.message);
+      }
+
+      // 2. Récupérer un grand lot de posts récents
+      const allPosts = await this.postRepository.find({
         relations: ['school', 'media', 'comments', 'comments.user', 'saves', 'saves.user', 'shares'],
         order: { createdAt: 'DESC' },
+        take: 300,
       });
 
-      const targetUserId = userId || '00000000-0000-4000-8000-000000000001';
-      return posts.map((post) => this._formatPost(post, targetUserId));
+      // 3. Séparer les posts en 3 catégories
+      let pinnedPosts: any[] = [];
+      let newPosts: any[] = [];
+      let otherPosts: any[] = [];
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      allPosts.forEach(post => {
+        if (pinnedSchoolIds.includes(post.school.id)) {
+          pinnedPosts.push(post);
+        } else if (new Date(post.createdAt) >= sevenDaysAgo) {
+          newPosts.push(post);
+        } else {
+          otherPosts.push(post);
+        }
+      });
+
+      // 4. Mélanger chaque catégorie pour la variance
+      pinnedPosts = this.shuffleArray(pinnedPosts);
+      newPosts = this.shuffleArray(newPosts);
+      otherPosts = this.shuffleArray(otherPosts);
+
+      // 5. Construire le flux final (Target: limit)
+      // Ex: limit = 100 -> ~20 épinglés, ~40 nouveaux, ~40 autres
+      const targetPinned = Math.floor(limit * 0.2);
+      const targetNew = Math.floor(limit * 0.4);
+      
+      let initialBlend = [
+        ...pinnedPosts.slice(0, targetPinned),
+        ...newPosts.slice(0, targetNew),
+        ...otherPosts.slice(0, limit - targetPinned - targetNew),
+      ];
+
+      // Si on n'a pas atteint la limite (par ex: pas assez de pinned posts), on complète avec les restes
+      const remainingLimit = limit - initialBlend.length;
+      if (remainingLimit > 0) {
+        const leftovers = [
+          ...pinnedPosts.slice(targetPinned),
+          ...newPosts.slice(targetNew),
+          ...otherPosts.slice(limit - targetPinned - targetNew)
+        ];
+        initialBlend = [...initialBlend, ...leftovers.slice(0, remainingLimit)];
+      }
+
+      // 6. Mélanger le flux final pour un effet "réseau social", 
+      // mais on pourrait garder les épinglés en haut.
+      // Mélangeons tout pour un vrai effet aléatoire (ou seulement les nouveautés/autres)
+      const finalFeed = this.shuffleArray(initialBlend);
+
+      return finalFeed.map((post) => this._formatPost(post, targetUserId));
     } catch (e) {
       console.error('Erreur dans findAllFormatted:', e);
       throw e;
