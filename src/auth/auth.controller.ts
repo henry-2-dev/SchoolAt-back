@@ -12,7 +12,9 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import type { Request } from 'express';
 import { SchoolsService } from '../schools/schools.service';
 import { UsersService } from '../users/users.service';
+import { Public } from './public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(
