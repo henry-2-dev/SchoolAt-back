@@ -11,6 +11,7 @@ import {
 import { CreateSchoolPostDto } from './dto/create-school-post.dto';
 import { UpdateSchoolPostDto } from './dto/update-school-post.dto';
 import { SchoolsPostsService } from './schools_posts.service';
+import { Public } from '../auth/public.decorator';
 
 @Controller('school-posts')
 export class SchoolsPostsController {
@@ -21,6 +22,7 @@ export class SchoolsPostsController {
     return this.postsService.create(dto);
   }
 
+  @Public()
   @Get('formatted')
   findAllFormatted(
     @Query('userId') userId?: string,

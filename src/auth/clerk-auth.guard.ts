@@ -31,17 +31,23 @@ export class ClerkAuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
+      if (!process.env.CLERK_SECRET_KEY) {
+        console.warn('[ClerkAuthGuard] WARNING: CLERK_SECRET_KEY is not defined in environment variables!');
+      }
+
       // clerkClient.verifyToken verifies JWT signature using Clerk JWKS
       const decoded = await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY,
       } as any);
 
+      console.log('[ClerkAuthGuard] Token validé pour:', decoded.sub);
+
       // Inject validated user payload into request
       request.user = { id: decoded.sub };
       return true;
     } catch (error) {
-      console.error('[ClerkAuthGuard] Échec vérification token:', error);
-      throw new UnauthorizedException('Token invalide ou expiré');
+      console.error('[ClerkAuthGuard] Échec vérification token:', error.message || error);
+      throw new UnauthorizedException('Problème d\'authentification (401)');
     }
   }
 }

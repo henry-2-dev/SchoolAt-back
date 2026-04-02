@@ -11,6 +11,7 @@ import {
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
 import { SchoolsService } from './schools.service';
+import { Public } from '../auth/public.decorator';
 
 @Controller('schools')
 export class SchoolsController {
@@ -26,6 +27,7 @@ export class SchoolsController {
     return this.schoolsService.findAll();
   }
 
+  @Public()
   @Get('geo')
   findNearbySchools(
     @Query('lat') lat?: string,
@@ -51,6 +53,7 @@ export class SchoolsController {
     );
   }
 
+  @Public()
   @Get(':id/profile')
   findProfileSchoolById(
     @Param('id') id: string,
@@ -82,6 +85,7 @@ export class SchoolsController {
     return this.schoolsService.remove(id);
   }
 
+  @Public()
   @Post('sync')
   syncSchool(@Body() dto: CreateSchoolDto) {
     console.log('[SchoolSync] Synchronisation reçue pour:', dto.name);
