@@ -34,7 +34,7 @@ export class ClerkAuthGuard implements CanActivate {
       // clerkClient.verifyToken verifies JWT signature using Clerk JWKS
       const decoded = await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY,
-      });
+      } as any);
 
       // Inject validated user payload into request
       request.user = { id: decoded.sub };

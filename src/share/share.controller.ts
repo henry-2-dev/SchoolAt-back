@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
-import { Response } from 'express';
+import * as express from 'express';
 import { Public } from '../auth/public.decorator';
 
 @Controller('share')
 export class ShareController {
   @Public()
   @Get('post/:id')
-  async redirectPost(@Param('id') id: string, @Res() res: Response) {
+  redirectPost(@Param('id') id: string, @Res() res: express.Response) {
     const deepLink = `schoolat://post/${id}`;
     
     // On renvoie une page HTML simple qui tente d'ouvrir l'app via le deep link
@@ -44,8 +44,7 @@ export class ShareController {
       </body>
       </html>
     `;
-    
-    res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Content-Type', 'text/html');
     return res.send(html);
   }
 }
