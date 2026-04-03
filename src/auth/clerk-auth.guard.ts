@@ -17,6 +17,9 @@ export class ClerkAuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+
+    console.log(`[ClerkAuthGuard] Acces a ${context.getHandler().name}: isPublic=${isPublic}`);
+
     if (isPublic) {
       return true;
     }
@@ -36,8 +39,9 @@ export class ClerkAuthGuard implements CanActivate {
       }
 
       // clerkClient.verifyToken verifies JWT signature using Clerk JWKS
-      const decoded = await verifyToken(token, {
-        secretKey: process.env.CLERK_SECRET_KEY,
+      // Ensure the secretKey is cast correctly to satisfy TS
+      const decoded: any = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY as string,
       } as any);
 
       console.log('[ClerkAuthGuard] Token validé pour:', decoded.sub);
